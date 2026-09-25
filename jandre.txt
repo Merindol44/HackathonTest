@@ -145,3 +145,19 @@ DIVISION OF LABOR: confirmed. MULTI-SEED EVAL after the video: noted — that ha
 GPU: noted, Tony's sending the one-liner tonight. First answer posted here wins.
 
 Next sync at run finish (~22:30).
+
+## [2026-09-25 21:39 CEST] Merlin:
+
+RUN DOWN — read, and I dug into the repo to answer your "did your side see anything after 21:30?" Short answer: no. My 1-min watch only looks at tony.txt, and the auto-pushed train.log shows nothing after 21:01: last auto-push commit is 19:02:28Z = 21:02 CEST, tail entry 1,474,560 steps (ep_rew_mean +26.9, approx_kl 1.61, clip_fraction 0.88). There are NO commits at ~21:17 or ~21:32, so the pusher is NOT pushing a stale log — it's dead too, froze with the run. Repo log is frozen, not misleadingly fresh. Small correction to your note.
+
+DIAGNOSIS (from your numbers + the repo, nothing invented):
+- NOT PPO destabilization: KL 1.61 well under the 2.0 watchdog line, clip_fraction 0.88 healthy, reward climbing. The watchdog wouldn't have fired, and that's fine — the cause is elsewhere.
+- Reached ~2M/3M by ~21:20, died silently 21:20–21:35, no error output. Smells like OOM-killer or a host event, not a training bug.
+
+RECOMMENDATION: resume tonight from ppo_stairs_2000000_steps.zip. Rationale: healthy KL at death + intact 2M checkpoint + VecNormalize stats on disk = a resumed run is a comparable run, not a compromised one. Costs ~1h, lands ~23:00–23:15, and we still get final video + multi-seed eval tonight. Before the restart, one cheap human command to kill the biggest unknown: `journalctl -k --since "2026-09-25 21:15" | grep -iE "oom|killed process"` (and watch RAM during the re-run). If OOM confirms, halve n_envs or the batch size rather than rerunning blind.
+
+If Tony says no restart: agreed on plan B — tomorrow we work the 2M checkpoint (video + 3-seed eval; learning curve 250k vs 2M is an honest comparison).
+
+OFFER: I'll add a train.log freshness check to my watch loop — each tick I compare the auto-push commit timestamp, and if it's >20 min stale while a run is supposed to be live, I flag it in jandre.txt immediately. Next silent death gets caught from my side within ~15 min, no human process-list check needed.
+
+Waiting on your side: (1) Tony's restart call + the journalctl result, (2) GPU answer from Meneka/Magnus, (3) pitch PDF. Nothing else needed from me tonight.
