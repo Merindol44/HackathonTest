@@ -37,6 +37,10 @@ def parse_args():
                    help="v1 only: number of steps (0 = flat ground)")
     p.add_argument("--step-h", type=float, default=0.12,
                    help="v1 only: step height in meters")
+    p.add_argument("--track-w", type=float, default=0.0,
+                   help="v1 only: reference-gait tracking reward weight")
+    p.add_argument("--anti-stand", action="store_true",
+                   help="v1 only: truncate episodes with no forward progress")
     return p.parse_args()
 
 
@@ -69,7 +73,8 @@ def main():
     def make_env():
         if args.env == "v1":
             from g1_stairs_env_v2 import G1StairsEnvV1
-            return G1StairsEnvV1(n_stairs=args.n_stairs, step_h=args.step_h)
+            return G1StairsEnvV1(n_stairs=args.n_stairs, step_h=args.step_h,
+                                 track_w=args.track_w, anti_stand=args.anti_stand)
         return G1StairsEnv()
 
     per_seed = []

@@ -59,6 +59,16 @@ MAX_STRIKES = 30
 W_VY = 0.4        # anti side-dodge
 W_Y = 0.2
 
+# Reference-gait tracking (imitation prior for the hard-to-discover walking
+# pattern). Open-loop phase; the task rewards still select real locomotion.
+GAIT_FREQ = 1.8          # Hz, human-like cadence
+GAIT_HIP_AMP = 0.35      # rad
+GAIT_KNEE_BASE, GAIT_KNEE_AMP = 0.15, 0.50
+TRACK_K = 8.0            # exp kernel sharpness on leg-joint MSE
+LEG_JNTS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+ANTI_STAND_STEPS = 120   # truncate if no forward progress in this many steps
+ANTI_STAND_DX = 0.02
+
 VX_LO, VX_HI = 0.25, 1.0     # realistic walking band (m/s)
 VX_MAX = 1.5                # hard ramp-down end
 STRIKE_HIGH, STRIKE_LOW = 0.08, 0.03   # foot-strike detection (m)
@@ -119,7 +129,8 @@ class G1StairsEnvV1(G1StairsEnv):
         step_h: height of each step (m).
     """
 
-    def __init__(self, g1_xml=None, n_stairs=6, step_h=0.12, render_mode=None):
+    def __init__(self, g1_xml=None, n_stairs=6, step_h=0.12, render_mode=None,
+                 track_w=0.0, anti_stand=False):
         # Bypass G1StairsEnv.__init__ (it hardcodes v0 geometry) and repeat
         # the setup with our builder. Observation/action spaces identical.
         import gymnasium as gym
@@ -131,6 +142,8 @@ class G1StairsEnvV1(G1StairsEnv):
                 "mujoco_menagerie" / "unitree_g1" / "g1.xml"
         self.n_stairs = int(n_stairs)
         self.step_h = float(step_h)
+        self.track_w = float(track_w)
+        self.anti_stand = bool(anti_stand)
         self.model = _build_model_v1(Path(g1_xml), self.n_stairs, self.step_h)
         self.data = mujoco.MjData(self.model)
 
@@ -175,6 +188,24 @@ class G1StairsEnvV1(G1StairsEnv):
         self._levels = set()
         self._strikes = 0
         self._prev_min_foot_z = 0.0
+        self._phase = 0.0
+        self._best_x = 0.0
+        self._last_prog_step = 0
+
+    # ------------------------------------------------------------------
+    def _gait_ref(self):
+        """Reference joint angles for the 12 leg DOFs at the current phase."""
+        ref = np.zeros(12)
+        for side, ph in ((0, self._phase), (6, self._phase + np.pi)):
+            s, c = np.sin(ph), np.cos(ph)
+            hip = GAIT_HIP_AMP * s
+            knee = GAIT_KNEE_BASE + GAIT_KNEE_AMP * max(0.0, c)
+            ankle = -(0.5 * hip + 0.4 * (knee - GAIT_KNEE_BASE))
+            ref[side + 0] = hip    # hip_pitch
+            ref[side + 3] = knee   # knee
+            ref[side + 4] = ankle  # ankle_pitch
+            # hip_roll / hip_yaw / ankle_roll stay at 0
+        return ref
 
     # ------------------------------------------------------------------
     def reset(self, *, seed=None, options=None):
@@ -190,6 +221,9 @@ class G1StairsEnvV1(G1StairsEnv):
             self._success_z = self._base_pelvis_z + self.n_stairs * self.step_h - 0.15
         else:
             self._success_z = 0.5
+        self._phase = float(self.np_random.uniform(0.0, 2.0 * np.pi))
+        self._best_x = float(self.data.xpos[self._pelvis][0])
+        self._last_prog_step = 0
         return obs, info
 
     # ------------------------------------------------------------------
@@ -218,6 +252,14 @@ class G1StairsEnvV1(G1StairsEnv):
         r_dodge = -(W_VY * abs(float(vy)) + W_Y * abs(float(pelvis_pos[1])))
         energy = W_ENERGY * float(np.sum(torques ** 2))
         tilt = W_TILT * float(roll ** 2 + pitch ** 2)
+
+        # Reference-gait tracking: imitation prior for the walking pattern.
+        r_track = 0.0
+        if self.track_w > 0.0:
+            self._phase += 2.0 * np.pi * GAIT_FREQ * (N_SUBSTEPS * PHYS_DT)
+            q_leg = d.qpos[7:][LEG_JNTS]
+            mse = float(np.mean((q_leg - self._gait_ref()) ** 2))
+            r_track = self.track_w * float(np.exp(-TRACK_K * mse))
 
         r_clear, r_knee = 0.0, 0.0
         if self.n_stairs > 0 and (X0 - 0.6) <= pelvis_pos[0] <= (
@@ -248,13 +290,23 @@ class G1StairsEnvV1(G1StairsEnv):
 
         reward = (
             r_band + r_up + r_dodge + W_ALIVE - energy - tilt
-            + r_clear + r_knee + r_level + r_strike
+            + r_clear + r_knee + r_level + r_strike + r_track
         )
 
         fallen = (pelvis_pos[2] < FALL_Z) or (abs(roll) > TILT_LIM) or (abs(pitch) > TILT_LIM)
         success = (pelvis_pos[0] > self._success_x) and (
             pelvis_pos[2] > self._success_z
         )
+
+        # Anti-stand: no forward progress for a while -> truncate (not a fall,
+        # so no penalty; just stop wasting the episode standing/marching).
+        stalled = False
+        if self.anti_stand and not fallen:
+            if pelvis_pos[0] > self._best_x + ANTI_STAND_DX:
+                self._best_x = float(pelvis_pos[0])
+                self._last_prog_step = self._steps
+            elif self._steps - self._last_prog_step > ANTI_STAND_STEPS:
+                stalled = True
 
         terminated, info = False, {"is_success": bool(success)}
         if fallen:
@@ -263,7 +315,9 @@ class G1StairsEnvV1(G1StairsEnv):
         elif success:
             reward += R_SUCCESS
             terminated = True
-        truncated = (self._steps >= MAX_EPISODE_STEPS) and not terminated
+        truncated = (
+            ((self._steps >= MAX_EPISODE_STEPS) or stalled) and not terminated
+        )
 
         info.update(
             dict(
