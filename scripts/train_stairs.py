@@ -10,6 +10,7 @@ Example:
 
 import argparse
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -187,8 +188,18 @@ def main(orig_cwd):
         exact = parent / "vecnormalize.pkl"
         if exact.exists():
             cands.append(exact)
-        cands += [p for p in sorted(parent.glob("*vecnormalize*.pkl"))
-                  if p != exact]
+
+        def _stats_steps(p):
+            m = re.search(r"(\d+)_steps", p.name)
+            return int(m.group(1)) if m else -1
+
+        # Prefer the stats from the LATEST checkpoint: normalization running
+        # averages drift during training, so the newest match the policy best.
+        rest = sorted(
+            (p for p in parent.glob("*vecnormalize*.pkl") if p != exact),
+            key=_stats_steps, reverse=True,
+        )
+        cands += rest
         if cands:
             resume_stats = str(cands[0])
             print(f"[train] VecNormalize stats: {resume_stats}")
