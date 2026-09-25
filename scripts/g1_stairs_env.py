@@ -78,7 +78,12 @@ ACTION_SCALE = 0.35  # action in [-1,1] -> +-35% of each joint's half-range
 
 def _build_model(g1_xml_path: Path) -> mujoco.MjModel:
     """Compose G1 + ground + staircase + top platform via MjSpec."""
-    spec = mujoco.MjSpec.from_file(str(g1_xml_path))
+    spec = mujoco.MjSpec()
+    # MuJoCo <3.3: from_file is an instance method (returns None, fills in
+    # place). MuJoCo >=3.3: it is a classmethod returning the populated spec.
+    loaded = spec.from_file(str(g1_xml_path))
+    if loaded is not None:
+        spec = loaded
     world = spec.worldbody
 
     # Flat ground.
