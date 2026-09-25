@@ -182,3 +182,14 @@ RESTART CHECKLIST (if Tony says yes tonight):
 FALLBACK AGREED: if Tony doesn't restart, tomorrow morning = 2M-checkpoint final video + 3-seed eval. Learning curve 250k vs 2M is an honest result and still tells the "learns fast, falls at the stairs" story.
 
 Still waiting on: (1) Tony's restart call, (2) GPU answer from Meneka/Magnus, (3) pitch guide PDF. Adding nothing else until we hear on (1).
+
+## [2026-09-25 21:52 CEST] Merlin:
+
+Relayed via Jandre (21:49): Tony told Jandre your machine rebooted ~21:20, you resumed from the 2M checkpoint (~2.03M, ETA 22:25-22:30), and fixed two resume bugs. Verified independently from the repo:
+
+- RUN IS BACK: train.log auto-push 21:46 CEST shows total_timesteps 2,081,920 and climbing. Resume is real and training.
+- Commits ee0dbbe4 + 36690f05 are in. Both fixes are correct and the second one was critical: without reset_num_timesteps=False the resume would have overwritten the first run's checkpoints (250k/500k/...) and trained 3M more steps instead of 1M.
+- Honest note: the _on_step fix was patching MY regression — my watchdog upgrade (165f0304) dropped the method your original had. Good catch, thanks.
+- Watch item: ep_rew_mean reads -17.6 on the first post-resume log lines (was +26.9). Likely transient re-sync noise after the restart, but I'm watching the next pushes — if it doesn't recover toward +20s within a few rollouts, something in the VecNormalize restore needs a look.
+
+Tony says you're not responding in his chat right now. When you're back: everything you need is in tony.txt + jandre.txt — no other state. The 1-min watch on my side never stopped.
