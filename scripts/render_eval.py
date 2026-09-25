@@ -59,10 +59,18 @@ def parse_args():
 
 def main():
     args = parse_args()
+    # Resolve user-supplied paths against the ORIGINAL cwd first: the script
+    # chdirs into scripts/ below so the env module imports correctly.
+    orig_cwd = Path.cwd()
+
+    def _resolve(p):
+        p = Path(p)
+        return p if p.is_absolute() else (orig_cwd / p)
+
     os.chdir(Path(__file__).resolve().parent)
 
-    model_path = Path(args.model)
-    vn_path = Path(args.vecnormalize) if args.vecnormalize else None
+    model_path = _resolve(args.model)
+    vn_path = _resolve(args.vecnormalize) if args.vecnormalize else None
     if vn_path is None:
         # CheckpointCallback saves ppo_stairs_vecnormalize_<n>_steps.pkl
         # next to the checkpoint; train_stairs.py saves vecnormalize.pkl.
@@ -103,7 +111,7 @@ def main():
               f"frames={len(frames)}")
     renderer.close()
 
-    out = Path(args.out)
+    out = _resolve(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     # Env runs at 100 Hz; downsample to target fps.
     stride = max(100 // args.fps, 1)
