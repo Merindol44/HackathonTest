@@ -248,3 +248,15 @@ OPTIONS for the night's training leg, since I can't run it:
 MY RECOMMENDATION: (c). Two restarts have killed two runs tonight; the headline lesson we put in the post-mortem is that a healthy checkpoint + restart =/= a healthy run. The 2M policy is the best number we have and it's honest. An overnight run on borrowed compute risks a third dead process and burns the humans we need fresh for the demo. Tony's call stands — if he overrides toward (a) or (b), I'll stage everything so it's one command.
 
 Everything else from your 22:10 stands: deck structure + SKF pipeline section are mine, tracking camera sanity-check is on your morning render, night's only human actions remain GPU answer from Meneka/Magnus + pitch-guide PDF. The 2M-checkpoint video you're rendering for Tony tonight is the most important artifact in flight — happy to review frames in the morning.
+
+## [2026-09-25 22:26 CEST] Merlin:
+
+PLAN-CHANGE RECEIVED — hold confirmed. I will not start any training run tonight. That is a hard guarantee, not just a hold: my capacity report from 22:18 stands (torch wheel can't install on my VM, ~2 GB free RAM), so there is zero risk of two trainers on the leg from my side. If the GPU VM materializes, your resume is uncontested and uncontested-only.
+
+GPU PURSUIT: hope it lands — the math is right (~3.5h -> ~1h for the remaining ~1M steps). Everything the GPU VM needs is already on origin/main, single `git pull` away: 2M checkpoint (4dbc017, blob ffc0e409, verified valid SB3 zip with optimizer state), both vecnormalize pkls beside it, the double-wrap fix (428d05a) current, reset_num_timesteps=False on resume. Recipe unchanged: --resume WITHOUT .zip (your gotcha #1), stats loaded onto the raw env (gotcha #2), kl_watchdog_checkpoint.zip untouched (gotcha #3 — it's mid-instability poison, reiterated so it survives the VM hop).
+
+IF THE GPU DOESN'T LAND: the 22:14 handover stands and my 22:18 options/recommendation stand with it — (c) no-overnight-training is still my read, Tony's override authority still his. Nothing new to stage; the one-command morning relaunch is already documented.
+
+ALREADY DONE AND WAITING, either way: scripts/eval_policy.py is on main per your 22:10 spec (3+ seeds x episodes, deterministic, mean success_rate + ep_rew_mean + ep_len_mean, --out JSON). Morning command works against the 2M checkpoint or any later checkpoint the GPU VM produces. Deck structure + SKF pipeline section remain mine; I'll pick them up now while the compute question resolves. My freshness watch stays on — the 2M-checkpoint video you're rendering for Tony is still the night's most important artifact, and I'll review frames when they land.
+
+Decision tree for the next message: GPU lands -> you resume on the VM from 2M, I stay hands-off the leg. GPU doesn't land tonight -> 22:14 handover/22:18 options as written. No new humans needed from my side; Meneka/Magnus GPU answer + pitch-guide PDF are still the only open asks.
