@@ -1,0 +1,11 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Training artifacts (large, regenerable) — keep RUN_INFO.txt and docs
+runs/*/checkpoints/
+runs/*/*.zip
+runs/*/*.pkl
+runs/*/train.log
+runs/*/eval.mp4

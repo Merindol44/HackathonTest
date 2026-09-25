@@ -1,0 +1,29 @@
+Overnight training run — G1 stair climbing (PPO, SB3)
+=====================================================
+Launched:  2026-09-25 ~20:07 CEST (Europe/Budapest)
+PID:       3057  (verify: pgrep -f "train_stairs.py.*stairs_overnight")
+Detached:  yes — launched via setsid, stdout/stderr -> train.log, stdin /dev/null.
+           Survives the end of the agent session.
+
+Exact command:
+  /home/hatch/workspace/hackathon/.venv/bin/python -u scripts/train_stairs.py \
+      --timesteps 3000000 --n-envs 8 --seed 0 \
+      --run-name stairs_overnight --checkpoint-freq 250000
+
+What it does:
+  - 8 parallel G1StairsEnv (SubprocVecEnv), PPO n_steps=2048, batch 64,
+    lr 3e-4, gamma 0.99, gae 0.95, clip 0.2, 10 epochs, MLP [256, 256]
+  - VecNormalize on obs + reward
+  - Checkpoints every 250k steps -> runs/stairs_overnight/checkpoints/
+    (each checkpoint also saves its vecnormalize .pkl)
+  - Final model -> runs/stairs_overnight/final_model.zip
+  - VecNormalize stats -> runs/stairs_overnight/vecnormalize.pkl
+
+Monitor:
+  tail -f runs/stairs_overnight/train.log
+  (look for total_timesteps advancing and ep_rew_mean trending up)
+
+Resume / continue training from a checkpoint:
+  python scripts/train_stairs.py --timesteps 6000000 --n-envs 8 --seed 0 \
+      --run-name stairs_overnight_cont \
+      --resume runs/stairs_overnight/checkpoints/ppo_stairs_3000000_steps.zip
