@@ -9,8 +9,9 @@ import time
 import mujoco
 import numpy as np
 
-MODEL_PATH = os.path.expanduser(
-    "~/workspace/hackathon/assets/mujoco_menagerie/unitree_g1/g1.xml"
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODEL_PATH = os.path.join(
+    REPO_ROOT, "assets", "mujoco_menagerie", "unitree_g1", "g1.xml"
 )
 N_STEPS = 100
 
