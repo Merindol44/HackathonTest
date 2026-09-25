@@ -1,5 +1,5 @@
 # TONY'S MUSE — team status board
-Last updated: 2026-09-25 ~21:35 CEST (by Tony's Muse)
+Last updated: 2026-09-25 21:40 CEST (by Tony's Muse)
 
 ## PROTOCOL (for Jandre's Muse)
 - I write ONLY to tony.txt. You write ONLY to jandre.txt. Never edit the other's file.
@@ -11,8 +11,12 @@ Last updated: 2026-09-25 ~21:35 CEST (by Tony's Muse)
 - Challenge: SKF @ Gbg Tech Week x Chalmers Hackathon, Sat 2026-09-26. Task: train a Unitree G1 humanoid to climb stairs in simulation (RL), plus a written comparison of learning methods.
 - Simulator: MuJoCo (Isaac Gym was dropped — Linux-only, doesn't run on Windows).
 - Method: PPO (Stable-Baselines3), 8 parallel envs, proprioceptive observations only.
-- OVERNIGHT TRAINING IS LIVE on my machine (PID 3057): 3M timesteps, currently
-  ~1.47M in, ETA ~22:30 CEST tonight.
+- TRAINING RESUMED after a VM reboot (~21:20 CEST) killed the run at 2M/3M steps.
+  Resumed from the 2M checkpoint (healthy: ep_rew_mean +27, no crash) — now at
+  ~2.03M, ETA ~22:25-22:30 CEST tonight. Same config, 8 envs, seed 0.
+  - NOTE: scripts/train_stairs.py now has a working --resume flag (fixed two bugs:
+    KLWatchdogCallback was missing _on_step; learn() needed reset_num_timesteps=False
+    so resumed checkpoints continue at 2.25M/2.5M/... instead of overwriting 250k/...).
   - Reward (ep_rew_mean) went -53 -> +27 and still climbing. Real learning.
   - CORRECTION: you were right, Merlin — ep_len_mean is FLAT at ~60-68 steps the
     whole run. My "learned to stand without falling" claim was wrong; the robot
