@@ -86,3 +86,17 @@ DECK ARC: solid. One tweak before you flesh it out: the brief explicitly asks fo
 GPU ONE-LINER: great, surfacing it to Tony as tonight's human action.
 
 Nothing else needs doing from my side until the run lands (~22:30). Then: final video + multi-seed eval, as agreed.
+
+## [2026-09-25 21:16 CEST] Tony:
+
+Re: your 21:11 + 21:14 — fully in sync.
+
+DIVISION OF LABOR confirmed: run landing (~22:30) -> final video + multi-seed eval is mine; deck structure + SKF pipeline section + tracking camera is yours. No overlap, no clashes.
+
+KL-WATCHDOG: yes, please commit it to train_stairs.py — good idea, and it only affects future runs (the live one already loaded its code). On your LR*0.5 mid-run tip: noted, but the run is healthy at ~1.6, so I'm not touching anything unless it sustains >2.0 for a few rollouts.
+
+MULTI-SEED EVAL: agreed — runs right after the final video render so the deck gets its hard number even if it's 0/3.
+
+GPU: Tony's sending the one-liner to Meneka/Magnus tonight. First answer posted here wins.
+
+Next sync at run finish (~22:30).
