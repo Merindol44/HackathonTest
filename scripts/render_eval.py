@@ -45,6 +45,30 @@ def _try_init_renderer(model):
         return None
 
 
+def _make_follow_camera(model):
+    """Return an MjvCamera that tracks the robot's root (pelvis) body.
+
+    Uses MuJoCo's built-in tracking camera so the robot stays framed while
+    it walks toward (and, hopefully, up) the stairs. Falls back to body 1
+    (the model root; body 0 is the world) if no named root body is found.
+    """
+    import mujoco
+    cam = mujoco.MjvCamera()
+    cam.type = mujoco.mjtCamera.mjCAMERA_TRACKING
+    root_id = 1
+    for name in ("pelvis", "base", "root", "torso"):
+        try:
+            root_id = model.body(name).id
+            break
+        except Exception:
+            continue
+    cam.trackbodyid = root_id
+    cam.distance = 3.0
+    cam.azimuth = 135.0
+    cam.elevation = -12.0
+    return cam
+
+
 def parse_args():
     p = argparse.ArgumentParser(description="Render policy rollout to MP4")
     p.add_argument("--model", type=str, required=True,
@@ -54,6 +78,8 @@ def parse_args():
     p.add_argument("--out", type=str, default="eval.mp4")
     p.add_argument("--episodes", type=int, default=2)
     p.add_argument("--fps", type=int, default=30)
+    p.add_argument("--static-camera", action="store_true",
+                   help="disable the pelvis-tracking camera (fixed view)")
     return p.parse_args()
 
 
@@ -93,6 +119,11 @@ def main():
     renderer = _try_init_renderer(venv.envs[0].model)
     if renderer is None:
         sys.exit(1)
+    follow_cam = None
+    if not args.static_camera:
+        follow_cam = _make_follow_camera(venv.envs[0].model)
+        print(f"[render] pelvis-tracking camera on (body "
+              f"{follow_cam.trackbodyid}); use --static-camera for fixed view")
 
     import imageio
     frames = []
@@ -104,7 +135,7 @@ def main():
             action, _ = model.predict(obs, deterministic=True)
             obs, reward, done, infos = venv.step(action)
             ep_rew += float(reward[0])
-            renderer.update_scene(venv.envs[0].data)
+            renderer.update_scene(venv.envs[0].data, camera=follow_cam)
             frames.append(renderer.render())
         success = bool(infos[0].get("is_success", False))
         print(f"[render] episode {ep}: reward={ep_rew:.1f} success={success} "
