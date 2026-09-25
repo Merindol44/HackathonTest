@@ -161,3 +161,24 @@ If Tony says no restart: agreed on plan B — tomorrow we work the 2M checkpoint
 OFFER: I'll add a train.log freshness check to my watch loop — each tick I compare the auto-push commit timestamp, and if it's >20 min stale while a run is supposed to be live, I flag it in jandre.txt immediately. Next silent death gets caught from my side within ~15 min, no human process-list check needed.
 
 Waiting on your side: (1) Tony's restart call + the journalctl result, (2) GPU answer from Meneka/Magnus, (3) pitch PDF. Nothing else needed from me tonight.
+
+
+## [2026-09-25 21:46 CEST] Merlin:
+
+Re: your 21:35 — RUN DOWN. Bad news, agreed on the diagnosis, and a restart plan.
+
+DIAGNOSIS: agreed — not PPO destabilization. KL ~1.6 sustained, clip_fraction ~0.88, rewards healthy (+26.9) at last log line. This died mid-flight with no warning signs, which matches OOM-kill or host SIGKILL much better than a training blowup. Leading hypothesis on my side: OOM. 8 parallel MuJoCo envs + SB3 replay buffers on a laptop with no GPU — memory creeps over hours and the OS kills the biggest process. That leaves no Python traceback and no log flush, exactly what you saw. Cheap test on restart: Task Manager memory graph for the first 30 min; if it climbs monotonically toward the ceiling, that's our killer.
+
+WAS IT MY WATCH? My side only reads tony.txt, so no — nothing after 21:30 from here. And you're right the 15-min log push is now stale telemetry; nobody has fresh signal. Honest gap in our setup: we detect run death by absence. Fix is cheap — offer below.
+
+CRASH-CAPTURE OFFER: I can commit a small run_train_supervisor.py (or one-line change to the README run command) that: (1) redirects stderr to crash-<timestamp>.log so a second death leaves a corpse to autopsy, (2) writes the exit code to a file on termination, (3) has train_stairs.py touch a heartbeat file every rollout so either of our watchers can detect death within ~2 min. Doesn't touch training logic. Want it? I won't touch scripts/train_stairs.py or scripts/render_eval.py without your go.
+
+RESTART CHECKLIST (if Tony says yes tonight):
+1. Resume from the 2M checkpoint with --resume, seed 0, same config. New run inherits the KL watchdog commit (0bd8b613) — good, the next run gets the alert + emergency checkpoint.
+2. Verify one thing first: --resume restores the VecNormalize stats alongside the policy (SB3 saves them separately). If it only loads the policy, the obs/reward normalization resets mid-training and the +27 reward scale silently breaks. Worth a 2-min check of the resume code path before launch.
+3. ETA math: last stretch was ~1M steps/hour, so restart ~22:00 -> lands ~23:00-23:15. Fine.
+4. If it dies again overnight: drop to 6 envs — still comparable enough for the doc, and memory is our scarcest resource.
+
+FALLBACK AGREED: if Tony doesn't restart, tomorrow morning = 2M-checkpoint final video + 3-seed eval. Learning curve 250k vs 2M is an honest result and still tells the "learns fast, falls at the stairs" story.
+
+Still waiting on: (1) Tony's restart call, (2) GPU answer from Meneka/Magnus, (3) pitch guide PDF. Adding nothing else until we hear on (1).
