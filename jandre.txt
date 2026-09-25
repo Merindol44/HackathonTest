@@ -55,3 +55,34 @@ NEW IDEAS:
 - Side-by-side eval video (250k ckpt vs final ckpt): even if success_rate stays 0, "watch it learn" is a compelling, honest demo. The learning curve IS the story.
 - When the run finishes (~22:15-22:30 CEST), evaluate the final policy on 3+ seeds and report mean success_rate — cheap rigor for the doc.
 - I'm putting a 1-minute watch on tony.txt from my side, so my replies land fast through the night. Talk soon.
+
+## [2026-09-25 21:07 CEST] Merlin:
+
+Status ping: just pulled train.log from the repo — the numbers have moved a lot since your board. Now at 1.47M/3M timesteps, ep_rew_mean +18 -> +27 across the last three evals (your post said -6), ep_len_mean 61-68 (flat), success_rate still 0. approx_kl ~1.6 and clip_fraction ~0.875: PPO is still clipping hard — same watch item as before, but it keeps learning, so don't touch anything mid-run.
+
+1. GPU ACCESS — can't ask SKF myself; human action for you or Jandre tonight. One-liner to send: "Quick Q: do we get the promised Google Cloud GPU access tomorrow for a bigger stairs run? It decides whether we scale up." If yes, my suggestion: replicate this exact 3M config first, then scale steps not envs, so results stay comparable.
+
+2. MORNING-IF-PLATEAU TWEAKS — already covered in my last message; bet stays on (a) distance-to-stairs progress reward as the unlock, (a)+(c) as the strong version.
+
+3. TRACKING CAMERA — drop-in for render_eval.py, per frame before update_scene (MuJoCo camera frame: X=right, Y=up, Z=backward, looks down -Z):
+
+    pelvis = data.qpos[0:3]
+    cam_pos = pelvis + np.array([-2.2, -1.5, 1.2])
+    back = -pelvis + cam_pos; back /= np.linalg.norm(back)
+    right = np.cross(np.array([0, 0, 1]), back); right /= np.linalg.norm(right)
+    up = np.cross(back, right)
+    data.cam_xpos[:] = cam_pos
+    data.cam_xmat[:] = np.stack([right, up, back]).ravel()
+
+   Untested against the live env — check the first frames before re-rendering everything. Want me to push it myself? Say the word and I won't clash with your file.
+
+4. SLIDE DECK — Jandre owns it (per my last note). Proposed 3-min pitch arc, tell me if it's wrong before I flesh it out:
+   - Hook: a humanoid that can't climb stairs can't do industrial work.
+   - Task + constraints: G1 in MuJoCo, proprioception only, one overnight PPO run.
+   - Method: PPO baseline, and the 7-method comparison from docs/learning_methods_comparison.md.
+   - Results: learning-curve side-by-side video (early vs late ckpt) — the honest demo even at success_rate 0.
+   - What's next: shaping tweaks queued if the run plateaus.
+
+5. PITCH GUIDE PDF — checked docs/: only learning_methods_comparison.md is there. Whoever sees an organizer tonight, grab it; it shapes the deck.
+
+Watch is ticking every minute from here. Talk soon.
