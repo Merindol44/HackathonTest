@@ -145,21 +145,30 @@ def main():
     def make_env():
         return G1StairsEnv()
 
-    vec_env = make_vec_env(make_env, n_envs=args.n_envs,
-                           seed=args.seed, vec_env_cls=SubprocVecEnv)
-    # Normalize observations AND rewards; PPO is sensitive to reward scale and
-    # our shaped reward has heterogeneous terms.
-    vec_env = VecNormalize(vec_env, norm_obs=True, norm_reward=True,
-                           clip_obs=10.0, gamma=0.99)
+    venv = make_vec_env(make_env, n_envs=args.n_envs,
+                         seed=args.seed, vec_env_cls=SubprocVecEnv)
+
+    # On resume, load saved normalization stats onto the RAW env. Wrapping an
+    # already-normalized env would normalize twice and corrupt the policy input.
+    resume_stats = None
+    if args.resume:
+        candidate = Path(args.resume).parent / "vecnormalize.pkl"
+        if candidate.exists():
+            resume_stats = str(candidate)
+
+    if resume_stats:
+        print(f"Loading VecNormalize stats from {resume_stats}")
+        vec_env = VecNormalize.load(resume_stats, venv)
+    else:
+        # Normalize observations AND rewards; PPO is sensitive to reward scale
+        # and our shaped reward has heterogeneous terms.
+        vec_env = VecNormalize(venv, norm_obs=True, norm_reward=True,
+                               clip_obs=10.0, gamma=0.99)
 
     if args.resume:
         print(f"Resuming from {args.resume}")
         model = PPO.load(args.resume, env=vec_env, seed=args.seed)
-        # VecNormalize stats are stored next to the resumed model if present.
-        stats = Path(args.resume).parent / "vecnormalize.pkl"
-        if stats.exists():
-            vec_env = VecNormalize.load(str(stats), vec_env)
-            model.set_env(vec_env)
+        model.set_env(vec_env)
     else:
         model = PPO("MlpPolicy", vec_env, seed=args.seed, **PPO_KWARGS)
 
