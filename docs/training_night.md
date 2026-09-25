@@ -1,5 +1,21 @@
 # Overnight training log — 2026-09-26 (branch `muse/review-improvements`)
 
+<!-- LIVE-STATUS-START -->
+## Live status (auto-updated)
+
+- **Updated:** — (supervisor starting)
+- **Run:** `night_baseline`
+- **State:** TRAINING
+- **Timesteps:** —
+- **ep_rew_mean:** — | **ep_len_mean:** — | **success_rate:** — | **approx_kl:** —
+- **Restarts this run:** 0
+<!-- LIVE-STATUS-END -->
+
+**Orders in effect:** (1) auto-restart any dead run from its latest checkpoint
+via `--resume` (max 3 restarts, then abandon + move on); (2) this file is
+refreshed at least every 30 min (immediately on restarts/completions) for the
+hourly user briefing.
+
 Coordinator: Muse (overnight subagent). Physics verified full-fidelity at start:
 `model.opt.gravity = [0, 0, -9.81]`, total body mass 33.34 kg, contacts live
 (ncon=7 standing), dt=0.002. No video rendering this night — numbers only.
