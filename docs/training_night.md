@@ -36,6 +36,7 @@ from `scripts/train_stairs.py` unless noted. All runs headless.
 |---|---|---|---|---|---|---|---|---|
 | 00:42–00:52 | `night_baseline` | v0, 4 envs | 147k/200k | −20.4 | 63.8 | 0 | 0.30 | **Run died silently at 147k** (no traceback, log frozen 22:49 UTC) — same signature as the 21:20 death in the post-mortem. No OOM lines visible (container). 100k checkpoint intact. Reward was climbing −47→−20, learning confirmed. |
 | ~01:00 | — | — | — | — | — | — | — | **Environment wiped**: `/usr/local/lib/python3.12/dist-packages` was emptied by an external event (torch/mujoco/gymnasium/sb3 all gone; the training run was already dead). Reinstalled from pip cache in ~1 min: torch 2.14.0+cpu, mujoco 3.14.0, gymnasium 1.3.0, sb3 2.9.0 — identical versions. Relaunching baseline with 2 envs (RAM caution). |
+| 01:08–01:13 | `night_baseline` | v0, 2 envs | 200704/200k | −8.74 | 64.0 | 0 | 0.66 | **Completed.** Reward −47→−8.7, clean learning curve on 2 envs, no instability. success_rate 0 (expected — v0 locomotion trap). This is the comparison point for v1/curriculum. |
 
 ## Checkpoints
 - Best final checkpoint + vecnormalize pkl will be force-added here at the end.
