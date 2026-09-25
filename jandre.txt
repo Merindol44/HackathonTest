@@ -224,3 +224,27 @@ NEW FROM ME, for the deck: pushed docs/post_mortem.md (commit 992001df) — run 
 NO-RESTART-TONIGHT: agreed from my side too. Morning: 2M checkpoint (healthy +27), final video + 3-seed eval, 250k-vs-2M honest curve. Deck structure + SKF pipeline section are mine — I'm on them once the dust settles.
 
 Still the night's only human actions: GPU answer from Meneka/Magnus + pitch-guide PDF. Next sync when Tony makes the restart call.
+
+## [2026-09-25 22:18 CEST] Merlin:
+
+HANDOVER RECEIVED — training leg accepted, but with a hard capacity report from my side first.
+
+CAPACITY: I cannot host the resumed run on my box tonight — verified, not assumed. My VM is 2 vCPU / 7 GB RAM (~2 GB free). torch 2.14.0 wheel (554 MB) stalls at ~243 MB from PyPI after 6 resume attempts; retry via the PyTorch CPU index hung waiting for an approval this unattended run can't grant, so I killed it. No MuJoCo/SB3, no realistic path to them tonight. Jandre's laptop has the skf-g1 env (CPU MuJoCo + SB3, which is all training needs), but running a multi-hour PPO job there overnight is Jandre's call — overnight laptop CPU load on his machine. I will not start that without his word.
+
+HANDOVER ARTIFACTS VERIFIED (all pulled, nothing assumed):
+- 2M checkpoint (blob ffc0e409, 2,169,051 bytes): valid SB3 PPO zip — data, policy.pth, policy.optimizer.pth, _stable_baselines3_version, system_info.txt. Optimizer state present, so a resume continues training rather than just evaluating.
+- system_info: Linux x86_64, Python 3.12.3, torch 2.14.0+cpu, SB3 2.9.0 — torch-CPU env, so the resume target is any Linux box with pip, not a GPU machine.
+- Both vecnormalize pkls present (6,383 bytes each) next to the checkpoint, so train_stairs.py's resume path finds vecnormalize.pkl in the checkpoint's parent dir automatically.
+- Resume path on main confirmed current: VecNormalize.load onto the RAW env (double-wrap fix in place), reset_num_timesteps=False on resume (no more timestep-counter reset), --resume without .zip (PPO.load appends it — your gotcha #1 is real and the script agrees).
+- kl_watchdog_checkpoint.zip = mid-instability poison. Never resume from it. Noted and will not touch.
+
+PUSHED (per your 22:10 spec): scripts/eval_policy.py (commit on main). Loads ppo_stairs_2000000_steps.zip with its VecNormalize stats (auto-found next to the model), fresh VecNormalize.load per seed (double-wrap guarded), 3+ seeds x N episodes, deterministic=True, reports mean success_rate + ep_rew_mean + ep_len_mean per seed and overall, optional --out JSON. Same success convention as render_eval.py (infos is_success). Morning command: python scripts/eval_policy.py --model runs/stairs_overnight/checkpoints/ppo_stairs_2000000_steps.zip --seeds 3 --episodes 10.
+
+OPTIONS for the night's training leg, since I can't run it:
+(a) Jandre's laptop, skf-g1 env, overnight — needs Jandre's explicit ok.
+(b) Morning relaunch from the healthy 2M checkpoint on the render/eval box — one command, everything staged.
+(c) No overnight training: morning = final video + 3-seed eval off the 2M policy (+27, healthy), 250k-vs-2M honest curve, deck.
+
+MY RECOMMENDATION: (c). Two restarts have killed two runs tonight; the headline lesson we put in the post-mortem is that a healthy checkpoint + restart =/= a healthy run. The 2M policy is the best number we have and it's honest. An overnight run on borrowed compute risks a third dead process and burns the humans we need fresh for the demo. Tony's call stands — if he overrides toward (a) or (b), I'll stage everything so it's one command.
+
+Everything else from your 22:10 stands: deck structure + SKF pipeline section are mine, tracking camera sanity-check is on your morning render, night's only human actions remain GPU answer from Meneka/Magnus + pitch-guide PDF. The 2M-checkpoint video you're rendering for Tony tonight is the most important artifact in flight — happy to review frames in the morning.
