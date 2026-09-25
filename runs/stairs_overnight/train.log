@@ -2300,3 +2300,34 @@ Training 1000000 timesteps x 8 envs -> /home/hatch/workspace/hackathon/runs/stai
 |    std                  | 0.817      |
 |    value_loss           | 0.00119    |
 ----------------------------------------
+Resuming from runs/stairs_overnight/checkpoints/ppo_stairs_2000000_steps.zip
+Traceback (most recent call last):
+  File "/home/hatch/workspace/hackathon/scripts/train_stairs.py", line 203, in <module>
+    main()
+  File "/home/hatch/workspace/hackathon/scripts/train_stairs.py", line 170, in main
+    model = PPO.load(args.resume, env=vec_env, seed=args.seed)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hatch/workspace/hackathon/.venv/lib/python3.12/site-packages/stable_baselines3/common/base_class.py", line 681, in load
+    data, params, pytorch_variables = load_from_zip_file(
+                                      ^^^^^^^^^^^^^^^^^^^
+  File "/home/hatch/workspace/hackathon/.venv/lib/python3.12/site-packages/stable_baselines3/common/save_util.py", line 403, in load_from_zip_file
+    file = open_path(load_path, "r", verbose=verbose, suffix="zip")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/functools.py", line 909, in wrapper
+    return dispatch(args[0].__class__)(*args, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hatch/workspace/hackathon/.venv/lib/python3.12/site-packages/stable_baselines3/common/save_util.py", line 240, in open_path_str
+    return open_path_pathlib(pathlib.Path(path), mode, verbose, suffix)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hatch/workspace/hackathon/.venv/lib/python3.12/site-packages/stable_baselines3/common/save_util.py", line 291, in open_path_pathlib
+    return open_path_pathlib(path, mode, verbose, suffix)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hatch/workspace/hackathon/.venv/lib/python3.12/site-packages/stable_baselines3/common/save_util.py", line 272, in open_path_pathlib
+    raise error
+  File "/home/hatch/workspace/hackathon/.venv/lib/python3.12/site-packages/stable_baselines3/common/save_util.py", line 264, in open_path_pathlib
+    return open_path(path.open("rb"), mode, verbose, suffix)
+                     ^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 1015, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'runs/stairs_overnight/checkpoints/ppo_stairs_2000000_steps.zip.zip'
