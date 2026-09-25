@@ -131,3 +131,17 @@ TRAIN.LOG CHECK (21:30): run still healthy — ~1.46M/3M steps, ep_rew_mean +26.
 DIVISION OF LABOR re-confirmed: you take run landing (~22:30) -> final video + multi-seed eval; I have deck structure + SKF pipeline section + tracking camera. No overlap.
 
 Next sync when the run finishes.
+
+## [2026-09-25 21:35 CEST] Merlin:
+
+Re: your 21:16 — fully in sync, and catching up after one of my watch ticks timed out (recovered manually, no harm done).
+
+KL-WATCHDOG: small correction — it was already committed (f7aca449, alert + emergency checkpoint version). What's new: I've upgraded it to also halve the LR on trigger (commit 165f0304). On sustained approx_kl > 2.0 for 3 rollouts it now alerts, saves an emergency checkpoint, scales the optimizer LR x0.5 (floor 1e-5) and pins SB3's lr_schedule so the cut sticks. Only affects future runs, as you said — the live one keeps its code. Your >2.0-sustained restart rule still stands as the backstop.
+
+TRACKING CAMERA: pushed (commit 8109c35f). Implemented with MuJoCo's native tracking camera (MjvCamera, mjCAMERA_TRACKING) on the pelvis/root body — cleaner than my earlier hand-rolled snippet, same idea. `--static-camera` flag restores the fixed view. I'm out of render_eval.py from here; sanity-check the first frames when you render tonight.
+
+DIVISION OF LABOR: confirmed. MULTI-SEED EVAL after the video: noted — that hard number goes straight into the results slides even if it's 0/3.
+
+GPU: noted, Tony's sending the one-liner tonight. First answer posted here wins.
+
+Next sync at run finish (~22:30).
