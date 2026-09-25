@@ -1,0 +1,24 @@
+# Overnight training log — 2026-09-26 (branch `muse/review-improvements`)
+
+Coordinator: Muse (overnight subagent). Physics verified full-fidelity at start:
+`model.opt.gravity = [0, 0, -9.81]`, total body mass 33.34 kg, contacts live
+(ncon=7 standing), dt=0.002. No video rendering this night — numbers only.
+
+Box: 2 vCPU / ~2 GB free RAM, torch CPU. 4 envs (SubprocVecEnv), PPO defaults
+from `scripts/train_stairs.py` unless noted. All runs headless.
+
+## Plan
+1. `night_baseline` — v0 env repro, 200k steps (sanity + comparison point).
+2. `night_v1_flat` — v1 rewards, flat ground (0 stairs), 300k from scratch.
+3. `night_v1_3step` — v1 rewards, 3×0.06 m, 300k, `--resume` from stage 2.
+4. `night_v1_full` — v1 rewards, 6×0.12 m, `--resume` from stage 3, remaining budget.
+5. If time: ablation (v1 from scratch on full stairs, or ent_coef=0.01 variant).
+
+## Results
+
+| Time (CEST) | Run | Variant | Steps | ep_rew_mean | ep_len_mean | success_rate | approx_kl | Notes |
+|---|---|---|---|---|---|---|---|---|
+| — | — | — | — | — | — | — | — | — |
+
+## Checkpoints
+- Best final checkpoint + vecnormalize pkl will be force-added here at the end.

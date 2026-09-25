@@ -136,6 +136,13 @@ def parse_args():
                    help="path to a checkpoint to continue training from; "
                         "the .zip extension is optional and the path is "
                         "resolved against the directory you run from")
+    p.add_argument("--env", type=str, default="v0", choices=["v0", "v1"],
+                   help="v0 = original env, v1 = band+clearance rewards with "
+                        "parameterized stair geometry")
+    p.add_argument("--n-stairs", type=int, default=6,
+                   help="v1 only: number of steps (0 = flat ground)")
+    p.add_argument("--step-h", type=float, default=0.12,
+                   help="v1 only: step height in meters")
     return p.parse_args()
 
 
@@ -146,7 +153,12 @@ def main(orig_cwd):
     ckpt_dir.mkdir(parents=True, exist_ok=True)
 
     def make_env():
+        if args.env == "v1":
+            from g1_stairs_env_v2 import G1StairsEnvV1  # noqa: E402
+            return G1StairsEnvV1(n_stairs=args.n_stairs, step_h=args.step_h)
         return G1StairsEnv()
+
+    print(f"[train] env={args.env} n_stairs={args.n_stairs} step_h={args.step_h}")
 
     venv = make_vec_env(make_env, n_envs=args.n_envs,
                          seed=args.seed, vec_env_cls=SubprocVecEnv)

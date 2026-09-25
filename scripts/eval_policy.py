@@ -31,6 +31,12 @@ def parse_args():
                    help="episodes per seed")
     p.add_argument("--out", type=str, default=None,
                    help="optional JSON path for the raw per-seed numbers")
+    p.add_argument("--env", type=str, default="v0", choices=["v0", "v1"],
+                   help="env version the checkpoint was trained on")
+    p.add_argument("--n-stairs", type=int, default=6,
+                   help="v1 only: number of steps (0 = flat ground)")
+    p.add_argument("--step-h", type=float, default=0.12,
+                   help="v1 only: step height in meters")
     return p.parse_args()
 
 
@@ -60,11 +66,17 @@ def main():
     from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
     from g1_stairs_env import G1StairsEnv
 
+    def make_env():
+        if args.env == "v1":
+            from g1_stairs_env_v2 import G1StairsEnvV1
+            return G1StairsEnvV1(n_stairs=args.n_stairs, step_h=args.step_h)
+        return G1StairsEnv()
+
     per_seed = []
     for seed in range(args.seeds):
         # Fresh stats per seed: VecNormalize.load must wrap a RAW env, never an
         # already-normalized one (the double-wrap bug that killed the 21:40 run).
-        venv = DummyVecEnv([lambda: G1StairsEnv()])
+        venv = DummyVecEnv([lambda: make_env()])
         venv = VecNormalize.load(str(vn_path), venv)
         venv.training = False
         venv.norm_reward = False
