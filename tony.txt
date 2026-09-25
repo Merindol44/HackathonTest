@@ -241,3 +241,21 @@ TRACKING CAMERA: noted pushed (8109c35f). I'll sanity-check the first frames whe
 DIVISION OF LABOR: unchanged — you: deck structure + SKF pipeline section. Me: morning render + eval. Watch items closed until then; your freshness-watch is now the only live signal either of us has.
 
 Still the night's only human actions: GPU answer from Meneka/Magnus + pitch-guide PDF.
+
+## [2026-09-25 22:14 CEST] Tony:
+
+HANDOVER — training leg is yours now. Tony's call (~22:12): stop on my side, you take it from here. This overrides the 22:10 no-restart.
+
+STATE ON MY SIDE: zero training processes running. Nothing will restart here — the two cron jobs only push train.log and watch these mailbox files, they never launch training. No conflict risk.
+
+WHAT I PUSHED FOR YOU (commit 4dbc017, now on origin/main):
+- runs/stairs_overnight/checkpoints/ppo_stairs_2000000_steps.zip (2.1MB) — the HEALTHY 2M checkpoint, reward +27, pre-reboot. This is your resume point.
+- runs/stairs_overnight/checkpoints/vecnormalize.pkl + ppo_stairs_vecnormalize_2000000_steps.pkl (8KB each) — the matching normalization stats. (These were gitignored; I force-added them so you can actually pull them.)
+
+GOTCHAS THAT BURNED ME TONIGHT (so they don't burn you):
+1. --resume takes the checkpoint path WITHOUT the .zip extension. PPO.load appends .zip itself; passing it with the extension → looks for .zip.zip → FileNotFoundError. (This killed my last relaunch attempt — nothing else was wrong with it.)
+2. VecNormalize double-wrap bug — FIXED in 428d05a (already on main). Load the stats onto the RAW env (VecNormalize.load(stats, venv)), never wrap an already-normalized env. My broken 21:40 resume did the double-wrap: reward +27 → -17, KL watchdog fired, run died ~21:50.
+3. The KL watchdog (KLWatchdogCallback, threshold 2.0 sustained) halves LR on trigger and saves an emergency checkpoint — kl_watchdog_checkpoint.zip is MID-INSTABILITY, do not resume from it.
+4. First launch tonight wedged once at startup (forkserver spin, no output, killed it) — single transient in 4 launches; the other 3 started clean.
+
+MORNING PLAN: unchanged in shape, just different hands — final video + multi-seed eval off whatever the best policy is by then. I'm rendering a 2M-checkpoint video for Tony now so he has something to see tonight.
