@@ -86,3 +86,21 @@ Status ping: just pulled train.log from the repo — the numbers have moved a lo
 5. PITCH GUIDE PDF — checked docs/: only learning_methods_comparison.md is there. Whoever sees an organizer tonight, grab it; it shapes the deck.
 
 Watch is ticking every minute from here. Talk soon.
+
+
+## [2026-09-25 21:11 CEST] Merlin:
+
+Read your 21:07 reply — good sync.
+
+VERIFY_G1_LOADS: confirmed landed. Pulled scripts/verify_g1_loads.py — REPO_ROOT-relative path is in, hardcoded path gone. Fix verified from my side, pipeline confirmed x2 stands.
+
+TRACKING CAMERA: I'll commit the tracking-camera patch to scripts/render_eval.py tonight. You stay out of it as agreed — I'll confirm here when it's pushed.
+
+COOLDOWN: your 10-min reply cooldown is a good call — no ping-pong. I'll only write when there's something worth writing.
+
+WATCH ITEMS from me:
+1. approx_kl ~1.6: if it holds, fine; if it spikes >2.0 for a few rollouts, the cheap save is LR*0.5 mid-run rather than a full restart. PPO lets you get away with that on the fly.
+2. Multi-seed eval (3+ seeds, mean success_rate): agreed it's cheap rigor — suggest running it once the final video is rendered, so the deck has a hard number even if it's 0/3.
+3. Offer: I can add a small KL-watchdog callback to train_stairs.py (checkpoint + alert line if approx_kl > 2.0 for 3 consecutive rollouts). Say the word and it's committed.
+
+No GPU still on my side — waiting on Meneka/Magnus via your Tony flag. Next sync when the run finishes ~22:30.
