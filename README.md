@@ -11,7 +11,7 @@ comparison of learning methods for industrial humanoids.
 
 ```bash
 # 1. Get the G1 robot model (~60 MB, kept out of the repo)
-bash scripts/download_g1_model.sh
+bash scripts/download_g1_model.sh        # or: python scripts/download_g1_model.py
 
 # 2. Install dependencies (Python 3.10+)
 pip install mujoco gymnasium stable-baselines3 torch
@@ -31,12 +31,16 @@ python scripts/render_eval.py --model runs/<run-name>/final_model.zip --out eval
 | Path | What it is |
 |---|---|
 | `scripts/g1_stairs_env.py` | Gymnasium environment: G1 + 6-step staircase, reward shaping |
-| `scripts/train_stairs.py` | PPO training script (stable-baselines3) |
-| `scripts/render_eval.py` | Headless MP4 rendering of a trained policy |
-| `scripts/smoke_test.sh` | Short end-to-end pipeline test |
-| `scripts/download_g1_model.sh` | Fetches the G1 MJCF model (MuJoCo Menagerie) |
+| `scripts/train_stairs.py` | PPO training script (stable-baselines3); `--resume` continues a run |
+| `scripts/eval_policy.py` | Multi-seed evaluation of a checkpoint (success rate, reward, length) |
+| `scripts/render_eval.py` | Headless MP4 rendering of a trained policy (pelvis-tracking camera) |
+| `scripts/view_stairs.py` | Interactive 3D viewer of the env (zero action = stand) |
 | `scripts/verify_g1_loads.py` | Sanity check: model loads and steps |
+| `scripts/download_g1_model.sh` / `.py` | Fetches the G1 MJCF model (MuJoCo Menagerie) |
+| `scripts/smoke_test.sh` | Short end-to-end pipeline test |
+| `scripts/balls_of_solitude.py` | Farewell-to-Isaac-Gym demo: 1080 falling balls |
 | `docs/learning_methods_comparison.md` | Analysis: 7 learning methods vs industrial requirements |
+| `docs/post_mortem.md` | Post-mortem of the overnight training run (2026-09-25) |
 | `runs/` | Training outputs (checkpoints, logs; gitignored) |
 
 ## Approach

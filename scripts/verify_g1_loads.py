@@ -1,7 +1,7 @@
 """Headless verification: load the Unitree G1 MJCF model and step the sim.
 
-Run with the project venv:
-    ~/workspace/hackathon/.venv/bin/python ~/workspace/hackathon/scripts/verify_g1_loads.py
+Run from the repo root with the project venv, e.g.:
+    python scripts/verify_g1_loads.py
 """
 import os
 import time
