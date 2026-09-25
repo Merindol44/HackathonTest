@@ -3,10 +3,10 @@
 Loads a PPO checkpoint plus its VecNormalize statistics, runs deterministic
 rollouts in G1StairsEnv, and writes frames to an MP4 file.
 
-Headless rendering: tries MUJOCO_GL=osmesa, then egl. On machines with no GL
-at all (e.g. our headless training box), rendering is skipped with a clear
-message -- run this script on a laptop with a display instead, where
-mujoco.viewer / the default GL backend works out of the box.
+Headless rendering: on Linux without a display the script selects
+MUJOCO_GL=osmesa (needs libosmesa6 installed); on machines with a display
+or Windows it keeps MuJoCo's default backend. If no GL backend works, the
+script exits with a clear message -- run it on a team laptop instead.
 
 Example:
     python scripts/render_eval.py --model runs/smoke_test/checkpoints/ppo_stairs_25000_steps.zip \\
@@ -18,25 +18,31 @@ import os
 import sys
 from pathlib import Path
 
+# Choose the GL backend BEFORE mujoco gets imported anywhere (the backend is
+# locked in at first use). Headless Linux -> osmesa; machines with a display
+# (or Windows laptops) keep the default glfw backend.
+if os.environ.get("MUJOCO_GL") is None:
+    if os.name == "nt" or os.environ.get("DISPLAY"):
+        pass  # default backend works with a display
+    else:
+        os.environ["MUJOCO_GL"] = "osmesa"
+
 import numpy as np
 
 
 def _try_init_renderer(model):
     """Return a mujoco.Renderer, or None if no GL backend is available."""
     import mujoco
-    last_err = None
-    for backend in ("osmesa", "egl"):
-        os.environ["MUJOCO_GL"] = backend
-        try:
-            r = mujoco.Renderer(model, height=480, width=640)
-            print(f"[render] using MUJOCO_GL={backend}")
-            return r
-        except Exception as e:  # noqa: BLE001
-            last_err = e
-            print(f"[render] MUJOCO_GL={backend} failed: {type(e).__name__}")
-    print(f"[render] no headless GL backend available ({last_err}). "
-          "Run on a machine with a display instead.")
-    return None
+    try:
+        r = mujoco.Renderer(model, height=480, width=640)
+        print(f"[render] renderer OK (MUJOCO_GL={os.environ.get('MUJOCO_GL', 'default')})")
+        return r
+    except Exception as e:  # noqa: BLE001
+        print(f"[render] renderer failed: {type(e).__name__}: {e}")
+        print("[render] On a headless machine, install OSMesa "
+              "(apt install libosmesa6) or run this script on a laptop "
+              "with a display instead.")
+        return None
 
 
 def parse_args():
