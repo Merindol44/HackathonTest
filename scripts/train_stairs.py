@@ -13,7 +13,11 @@ import os
 from pathlib import Path
 
 from stable_baselines3 import PPO
-from stable_baselines3.common.callbacks import CheckpointCallback
+from stable_baselines3.common.callbacks import (
+    BaseCallback,
+    CallbackList,
+    CheckpointCallback,
+)
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.vec_env import SubprocVecEnv, VecNormalize
 
@@ -38,6 +42,49 @@ PPO_KWARGS = dict(
     policy_kwargs=dict(net_arch=[256, 256]),
     verbose=1,
 )
+
+
+class KLWatchdogCallback(BaseCallback):
+    """Watch PPO's approx_kl and raise an alert if it stays high.
+
+    After each rollout, reads the last ``train/approx_kl`` value from the
+    PPO logger. If it exceeds ``threshold`` for ``patience`` consecutive
+    rollouts, prints an alert line and saves an emergency checkpoint next
+    to the regular checkpoints. Never stops or alters training — it only
+    signals and snapshots, so the run stays recoverable if the policy
+    starts diverging.
+    """
+
+    def __init__(self, save_path, threshold=2.0, patience=3, verbose=0):
+        super().__init__(verbose)
+        self.save_path = Path(save_path)
+        self.threshold = threshold
+        self.patience = patience
+        self.bad_rollouts = 0
+        self.alerted = False
+
+    def _on_rollout_end(self) -> bool:
+        approx_kl = self.model.logger.name_to_value.get("train/approx_kl")
+        if approx_kl is None:
+            return True
+        if approx_kl > self.threshold:
+            self.bad_rollouts += 1
+        else:
+            self.bad_rollouts = 0
+            self.alerted = False
+        if self.bad_rollouts >= self.patience and not self.alerted:
+            self.alerted = True
+            print(
+                f"[kl-watchdog] approx_kl={approx_kl:.3f} > {self.threshold} "
+                f"for {self.patience} consecutive rollouts. "
+                f"Emergency checkpoint saved to {self.save_path}. "
+                f"Consider LR*0.5 mid-run or a restart with a lower "
+                f"learning rate.",
+                flush=True,
+            )
+            self.save_path.mkdir(parents=True, exist_ok=True)
+            self.model.save(str(self.save_path / "kl_watchdog_checkpoint"))
+        return True
 
 
 def parse_args():
@@ -87,9 +134,16 @@ def main():
         save_vecnormalize=True,
     )
 
+    kl_watchdog = KLWatchdogCallback(
+        save_path=ckpt_dir,
+        threshold=2.0,
+        patience=3,
+    )
+    callbacks = CallbackList([checkpoint_cb, kl_watchdog])
+
     print(f"Training {args.timesteps} timesteps x {args.n_envs} envs "
           f"-> {run_dir}")
-    model.learn(total_timesteps=args.timesteps, callback=checkpoint_cb)
+    model.learn(total_timesteps=args.timesteps, callback=callbacks)
 
     model.save(str(run_dir / "final_model"))
     vec_env.save(str(run_dir / "vecnormalize.pkl"))
