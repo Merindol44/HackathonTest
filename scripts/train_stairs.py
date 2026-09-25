@@ -92,6 +92,9 @@ class KLWatchdogCallback(BaseCallback):
             pass
         return old[0], pinned
 
+    def _on_step(self) -> bool:
+        return True
+
     def _on_rollout_end(self) -> bool:
         approx_kl = self.model.logger.name_to_value.get("train/approx_kl")
         if approx_kl is None:
@@ -176,7 +179,10 @@ def main():
 
     print(f"Training {args.timesteps} timesteps x {args.n_envs} envs "
           f"-> {run_dir}")
-    model.learn(total_timesteps=args.timesteps, callback=callbacks)
+    # On resume, keep the loaded timestep counter so checkpoints continue at
+    # 2.25M/2.5M/... instead of overwriting the earlier run's 250k/500k/... files.
+    model.learn(total_timesteps=args.timesteps, callback=callbacks,
+                reset_num_timesteps=not args.resume)
 
     model.save(str(run_dir / "final_model"))
     vec_env.save(str(run_dir / "vecnormalize.pkl"))
