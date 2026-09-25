@@ -45,23 +45,52 @@ PPO_KWARGS = dict(
 
 
 class KLWatchdogCallback(BaseCallback):
-    """Watch PPO's approx_kl and raise an alert if it stays high.
+    """Watch PPO's approx_kl and intervene if it stays high.
 
     After each rollout, reads the last ``train/approx_kl`` value from the
     PPO logger. If it exceeds ``threshold`` for ``patience`` consecutive
-    rollouts, prints an alert line and saves an emergency checkpoint next
-    to the regular checkpoints. Never stops or alters training — it only
-    signals and snapshots, so the run stays recoverable if the policy
-    starts diverging.
+    rollouts it:
+      1. prints an alert line,
+      2. saves an emergency checkpoint next to the regular checkpoints,
+      3. (when halve_lr) multiplies the optimizer learning rate by
+         ``lr_factor`` (floored at ``min_lr``) and pins SB3's lr_schedule
+         to the new value so the reduction survives future updates.
+
+    Rationale: approx_kl persistently > ~2.0 means PPO updates are too
+    aggressive and the run risks collapse; halving the LR is the standard
+    rescue. It only affects future updates, never past ones, so a healthy
+    run (kl ~1.6) is untouched.
     """
 
-    def __init__(self, save_path, threshold=2.0, patience=3, verbose=0):
+    def __init__(self, save_path, threshold=2.0, patience=3,
+                 halve_lr=True, lr_factor=0.5, min_lr=1e-5, verbose=0):
         super().__init__(verbose)
         self.save_path = Path(save_path)
         self.threshold = threshold
         self.patience = patience
+        self.halve_lr = halve_lr
+        self.lr_factor = lr_factor
+        self.min_lr = min_lr
         self.bad_rollouts = 0
         self.alerted = False
+
+    def _halve_lr(self):
+        """Scale the optimizer LR and pin SB3's schedule. Returns (old, new)."""
+        try:
+            opt = self.model.policy.optimizer
+        except Exception:
+            return None
+        old = [pg["lr"] for pg in opt.param_groups]
+        new = [max(lr * self.lr_factor, self.min_lr) for lr in old]
+        for pg, nl in zip(opt.param_groups, new):
+            pg["lr"] = nl
+        # Pin the schedule so SB3 does not restore the old rate later.
+        pinned = new[0]
+        try:
+            self.model.lr_schedule = lambda _progress_remaining: pinned
+        except Exception:
+            pass
+        return old[0], pinned
 
     def _on_rollout_end(self) -> bool:
         approx_kl = self.model.logger.name_to_value.get("train/approx_kl")
@@ -74,16 +103,20 @@ class KLWatchdogCallback(BaseCallback):
             self.alerted = False
         if self.bad_rollouts >= self.patience and not self.alerted:
             self.alerted = True
-            print(
-                f"[kl-watchdog] approx_kl={approx_kl:.3f} > {self.threshold} "
-                f"for {self.patience} consecutive rollouts. "
-                f"Emergency checkpoint saved to {self.save_path}. "
-                f"Consider LR*0.5 mid-run or a restart with a lower "
-                f"learning rate.",
-                flush=True,
-            )
             self.save_path.mkdir(parents=True, exist_ok=True)
             self.model.save(str(self.save_path / "kl_watchdog_checkpoint"))
+            msg = (
+                f"[kl-watchdog] approx_kl={approx_kl:.3f} > {self.threshold} "
+                f"for {self.patience} consecutive rollouts. "
+                f"Emergency checkpoint saved to {self.save_path}."
+            )
+            if self.halve_lr:
+                res = self._halve_lr()
+                if res is not None:
+                    msg += f" LR {res[0]:.2e} -> {res[1]:.2e}."
+            else:
+                msg += " Consider LR*0.5 mid-run or a lower-LR restart."
+            print(msg, flush=True)
         return True
 
 
