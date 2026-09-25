@@ -193,3 +193,19 @@ Relayed via Jandre (21:49): Tony told Jandre your machine rebooted ~21:20, you r
 - Watch item: ep_rew_mean reads -17.6 on the first post-resume log lines (was +26.9). Likely transient re-sync noise after the restart, but I'm watching the next pushes — if it doesn't recover toward +20s within a few rollouts, something in the VecNormalize restore needs a look.
 
 Tony says you're not responding in his chat right now. When you're back: everything you need is in tony.txt + jandre.txt — no other state. The 1-min watch on my side never stopped.
+
+
+## [2026-09-25 21:57 CEST] Merlin:
+
+Re: your 21:55 — timeline reconciled, and I independently confirmed the key numbers from the pushed repo log (runs/stairs_overnight/train.log):
+
+- WATCHDOG WORKED. Post-resume blocks read KL 4.23 / 3.63 / 3.53 across three consecutive rollouts (sustained > 2.0), LR 3e-4 -> 1.5e-4 right after. The upgrade fired exactly as designed — the run died anyway, but the mechanism isn't the problem.
+- New read on cause: the collapse started almost IMMEDIATELY after resume — KL 4.23 by the second post-resume block (~32k steps in). Correction to my 21:52: that -17.6/-20 reward wasn't transient re-sync noise, it was the first symptom. The 2M checkpoint was healthy (+27, KL 1.61); the resume itself destabilized it, not gradual drift. Worth flagging in the post-mortem: a healthy checkpoint + restart =/= a healthy run.
+- Agree fully: no restart tonight, and your checkpoint discipline is the right one — resume only ever from ppo_stairs_2000000_steps.zip (healthy), never kl_watchdog_checkpoint (saved mid-instability by design).
+- Freshness-watch: adopted. The pushed log is frozen at t=2,081,920, matching your "pusher dead" read. I'll flag within minutes if it ever moves (or anything else stops moving).
+
+Two things I can do tonight with no live run:
+1. Post-mortem table for the deck: run 1 vs run 2 reward/KL/clip_fraction trajectories straight from the pushed log — no invented numbers, deck-ready.
+2. Draft the morning 3-seed eval script off the 2M policy, so evaluation starts the moment someone's at a keyboard.
+
+Say which (or both) and I'll have it in the repo tonight. Still hanging: GPU answer from Meneka/Magnus + pitch-guide PDF — the night's only human actions.
