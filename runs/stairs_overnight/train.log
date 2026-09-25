@@ -2058,3 +2058,176 @@ Training 3000000 timesteps x 8 envs -> /home/hatch/workspace/hackathon/runs/stai
 |    std                  | 0.846     |
 |    value_loss           | 0.0778    |
 ---------------------------------------
+Resuming from /home/hatch/workspace/hackathon/runs/stairs_overnight/checkpoints/ppo_stairs_2000000_steps.zip
+Traceback (most recent call last):
+  File "/home/hatch/workspace/hackathon/scripts/train_stairs.py", line 155, in <module>
+    main()
+  File "/home/hatch/workspace/hackathon/scripts/train_stairs.py", line 137, in main
+    kl_watchdog = KLWatchdogCallback(
+                  ^^^^^^^^^^^^^^^^^^^
+TypeError: Can't instantiate abstract class KLWatchdogCallback without an implementation for abstract method '_on_step'
+Resuming from /home/hatch/workspace/hackathon/runs/stairs_overnight/checkpoints/ppo_stairs_2000000_steps.zip
+Training 1000000 timesteps x 8 envs -> /home/hatch/workspace/hackathon/runs/stairs_overnight
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 46.6     |
+|    ep_rew_mean     | -20      |
+|    success_rate    | 0        |
+| time/              |          |
+|    fps             | 840      |
+|    iterations      | 1        |
+|    time_elapsed    | 19       |
+|    total_timesteps | 16384    |
+---------------------------------
+--------------------------------------
+| rollout/                |          |
+|    ep_len_mean          | 51.9     |
+|    ep_rew_mean          | -19.7    |
+|    success_rate         | 0        |
+| time/                   |          |
+|    fps                  | 565      |
+|    iterations           | 2        |
+|    time_elapsed         | 57       |
+|    total_timesteps      | 32768    |
+| train/                  |          |
+|    approx_kl            | 4.231227 |
+|    clip_fraction        | 0.926    |
+|    clip_range           | 0.2      |
+|    entropy_loss         | -35.7    |
+|    explained_variance   | -3.13    |
+|    learning_rate        | 0.0003   |
+|    loss                 | -0.0935  |
+|    n_updates            | 1230     |
+|    policy_gradient_loss | 0.0158   |
+|    std                  | 0.831    |
+|    value_loss           | 0.0684   |
+--------------------------------------
+---------------------------------------
+| rollout/                |           |
+|    ep_len_mean          | 47        |
+|    ep_rew_mean          | -20.1     |
+|    success_rate         | 0         |
+| time/                   |           |
+|    fps                  | 516       |
+|    iterations           | 3         |
+|    time_elapsed         | 95        |
+|    total_timesteps      | 49152     |
+| train/                  |           |
+|    approx_kl            | 3.6285145 |
+|    clip_fraction        | 0.916     |
+|    clip_range           | 0.2       |
+|    entropy_loss         | -35.7     |
+|    explained_variance   | -2.8      |
+|    learning_rate        | 0.0003    |
+|    loss                 | -0.0629   |
+|    n_updates            | 1240      |
+|    policy_gradient_loss | 0.00983   |
+|    std                  | 0.83      |
+|    value_loss           | 0.0226    |
+---------------------------------------
+Resuming from /home/hatch/workspace/hackathon/runs/stairs_overnight/checkpoints/ppo_stairs_2000000_steps.zip
+Training 1000000 timesteps x 8 envs -> /home/hatch/workspace/hackathon/runs/stairs_overnight
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 46.6     |
+|    ep_rew_mean     | -20      |
+|    success_rate    | 0        |
+| time/              |          |
+|    fps             | 777      |
+|    iterations      | 1        |
+|    time_elapsed    | 21       |
+|    total_timesteps | 2016384  |
+---------------------------------
+--------------------------------------
+| rollout/                |          |
+|    ep_len_mean          | 51.9     |
+|    ep_rew_mean          | -19.7    |
+|    success_rate         | 0        |
+| time/                   |          |
+|    fps                  | 556      |
+|    iterations           | 2        |
+|    time_elapsed         | 58       |
+|    total_timesteps      | 2032768  |
+| train/                  |          |
+|    approx_kl            | 4.231227 |
+|    clip_fraction        | 0.926    |
+|    clip_range           | 0.2      |
+|    entropy_loss         | -35.7    |
+|    explained_variance   | -3.13    |
+|    learning_rate        | 0.0003   |
+|    loss                 | -0.0935  |
+|    n_updates            | 1230     |
+|    policy_gradient_loss | 0.0158   |
+|    std                  | 0.831    |
+|    value_loss           | 0.0684   |
+--------------------------------------
+---------------------------------------
+| rollout/                |           |
+|    ep_len_mean          | 47        |
+|    ep_rew_mean          | -20.1     |
+|    success_rate         | 0         |
+| time/                   |           |
+|    fps                  | 509       |
+|    iterations           | 3         |
+|    time_elapsed         | 96        |
+|    total_timesteps      | 2049152   |
+| train/                  |           |
+|    approx_kl            | 3.6285145 |
+|    clip_fraction        | 0.916     |
+|    clip_range           | 0.2       |
+|    entropy_loss         | -35.7     |
+|    explained_variance   | -2.8      |
+|    learning_rate        | 0.0003    |
+|    loss                 | -0.0629   |
+|    n_updates            | 1240      |
+|    policy_gradient_loss | 0.00983   |
+|    std                  | 0.83      |
+|    value_loss           | 0.0226    |
+---------------------------------------
+[kl-watchdog] approx_kl=3.525 > 2.0 for 3 consecutive rollouts. Emergency checkpoint saved to /home/hatch/workspace/hackathon/runs/stairs_overnight/checkpoints. LR 3.00e-04 -> 1.50e-04.
+--------------------------------------
+| rollout/                |          |
+|    ep_len_mean          | 52.1     |
+|    ep_rew_mean          | -22.4    |
+|    success_rate         | 0        |
+| time/                   |          |
+|    fps                  | 490      |
+|    iterations           | 4        |
+|    time_elapsed         | 133      |
+|    total_timesteps      | 2065536  |
+| train/                  |          |
+|    approx_kl            | 3.525136 |
+|    clip_fraction        | 0.914    |
+|    clip_range           | 0.2      |
+|    entropy_loss         | -35.7    |
+|    explained_variance   | -1.94    |
+|    learning_rate        | 0.0003   |
+|    loss                 | -0.0643  |
+|    n_updates            | 1250     |
+|    policy_gradient_loss | 0.0098   |
+|    std                  | 0.83     |
+|    value_loss           | 0.00646  |
+--------------------------------------
+---------------------------------------
+| rollout/                |           |
+|    ep_len_mean          | 44.2      |
+|    ep_rew_mean          | -17.6     |
+|    success_rate         | 0         |
+| time/                   |           |
+|    fps                  | 477       |
+|    iterations           | 5         |
+|    time_elapsed         | 171       |
+|    total_timesteps      | 2081920   |
+| train/                  |           |
+|    approx_kl            | 0.8209232 |
+|    clip_fraction        | 0.818     |
+|    clip_range           | 0.2       |
+|    entropy_loss         | -35.5     |
+|    explained_variance   | -0.118    |
+|    learning_rate        | 0.00015   |
+|    loss                 | -0.134    |
+|    n_updates            | 1260      |
+|    policy_gradient_loss | -0.0776   |
+|    std                  | 0.828     |
+|    value_loss           | 0.00243   |
+---------------------------------------
