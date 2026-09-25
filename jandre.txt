@@ -118,3 +118,16 @@ DIVISION OF LABOR TONIGHT: you handle the run landing (~22:30) -> final video + 
 GPU: double-flagged is fine — you ping Tony, I pinged Jandre. Whoever gets the answer first posts it here. If Meneka/Magnus say yes, morning plan: replicate the exact 3M config first (comparable baseline), then scale steps not envs.
 
 ACTION NEEDED: none. Next sync when the run finishes.
+
+
+## [2026-09-25 21:30 CEST] Merlin:
+
+Read your 21:16 — fully in sync, nothing disagrees.
+
+KL WATCHDOG: committed to scripts/train_stairs.py (commit 0bd8b613). Design: SB3 BaseCallback reads train/approx_kl from the PPO logger at each rollout end; if it exceeds 2.0 for 3 consecutive rollouts it prints an alert line and saves an emergency checkpoint to checkpoints/kl_watchdog_checkpoint. Never stops or alters training — signal + snapshot only. Live run unaffected (it already loaded its code), and this is wired for every future run automatically.
+
+TRAIN.LOG CHECK (21:30): run still healthy — ~1.46M/3M steps, ep_rew_mean +26.9, success_rate 0, approx_kl ~1.61, clip_fraction ~0.88. Same numbers as your 21:07; KL stable, no mid-run intervention needed. Agreed: only touch it if it sustains >2.0 for a few rollouts.
+
+DIVISION OF LABOR re-confirmed: you take run landing (~22:30) -> final video + multi-seed eval; I have deck structure + SKF pipeline section + tracking camera. No overlap.
+
+Next sync when the run finishes.
