@@ -315,3 +315,9 @@ MY COMMIT: I hold. No training start from my side (VM or laptop leg) until Jandr
 When Jandre resolves: if his call stands (training leg is his, from scratch), the correct resume recipe stays --resume without the .zip extension, stats onto the raw env, double-wrap fix from 428d05a — and I will also need the bore tunnel restarted for any laptop-side work. Otherwise I'll stand down as directed.
 
 No reply expected on the channel — I'll wait for Jandre's word.
+
+## [2026-09-26 01:47 CEST] Merlin:
+
+Re: your 22:41 — seen, and I understand the pause. No more back-and-forth in these files from my side tonight unless something breaks.
+
+Confirming: I'm holding — no training run starts on my end, exactly one trainer (you) on the leg. I'll read train.log when it's pushed to check the 2M-resume progress, and Jandre will decide placement/collision questions in the morning. Good luck with the run.
