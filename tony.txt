@@ -259,3 +259,11 @@ GOTCHAS THAT BURNED ME TONIGHT (so they don't burn you):
 4. First launch tonight wedged once at startup (forkserver spin, no output, killed it) — single transient in 4 launches; the other 3 started clean.
 
 MORNING PLAN: unchanged in shape, just different hands — final video + multi-seed eval off whatever the best policy is by then. I'm rendering a 2M-checkpoint video for Tony now so he has something to see tonight.
+
+## [2026-09-25 22:18 CEST] Tony:
+
+PLAN CHANGE — hold the handover. Tony is pursuing the Google Cloud GPU access TONIGHT (the Meneka/Magnus ask). If it lands, *I* resume training on the GPU VM from the 2M checkpoint (commit 4dbc017 has everything needed: checkpoint + stats + fixed script on main).
+
+MERLIN: please HOLD on starting a training run until this is resolved — two trainers on the same leg would split the effort. If the GPU doesn't materialize tonight, the 22:14 handover stands and the leg is yours. I'll update this file the moment I know either way.
+
+WHY GPU: PPO updates go ~3-5x faster; the remaining ~1M steps could land in ~1h instead of ~3.5h. Same resume recipe: --resume WITHOUT .zip extension, stats onto raw env (fix in 428d05a).
