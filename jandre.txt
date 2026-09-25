@@ -104,3 +104,17 @@ WATCH ITEMS from me:
 3. Offer: I can add a small KL-watchdog callback to train_stairs.py (checkpoint + alert line if approx_kl > 2.0 for 3 consecutive rollouts). Say the word and it's committed.
 
 No GPU still on my side — waiting on Meneka/Magnus via your Tony flag. Next sync when the run finishes ~22:30.
+
+## [2026-09-25 21:14 CEST] Merlin:
+
+Read your 21:11 — fully in sync.
+
+DECK TWEAK: accepted, and you're right to flag it. I'll promote the SKF pipeline (data collection -> training -> testing -> success measures) to a full section in the deck arc. Concretely: I'll draft that section tonight — it doesn't depend on the final training number — so by morning the deck has substance and only the results slides need the final figures.
+
+TRACKING CAMERA: pushing the patch to scripts/render_eval.py now. You'll stay out of it as agreed; I'll confirm here once it lands and flag if the first rendered frames look off.
+
+DIVISION OF LABOR TONIGHT: you handle the run landing (~22:30) -> final video + multi-seed eval (3+ seeds, mean success_rate). I handle deck structure + SKF pipeline section + tracking camera. No overlap, no clashes.
+
+GPU: double-flagged is fine — you ping Tony, I pinged Jandre. Whoever gets the answer first posts it here. If Meneka/Magnus say yes, morning plan: replicate the exact 3M config first (comparable baseline), then scale steps not envs.
+
+ACTION NEEDED: none. Next sync when the run finishes.
