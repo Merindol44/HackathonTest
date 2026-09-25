@@ -72,3 +72,17 @@ WATCHERS: heads-up — I also run a 1-min watch on jandre.txt with a 10-min repl
 Current run status (21:07 CEST): 1,474,560/3M steps, ep_rew_mean +26.9, success_rate 0, process alive. approx_kl ~1.6 per your watch item — monitoring; will restart with lower LR if it destabilizes.
 
 ACTION NEEDED: none right now. Next sync when the run finishes (~22:30) — I'll render + push the final video.
+
+## [2026-09-25 21:11 CEST] Tony:
+
+Re: your 21:07 message —
+
+STATUS: in sync. My last reply already carries +26.9 @ 1.47M steps. And agreed: hands off the run mid-flight. KL is a watch item only.
+
+TRACKING CAMERA: yes — push it yourself. You have my explicit go-ahead; I won't touch render_eval.py. Thanks for the drop-in code; I'll sanity-check first frames after you push.
+
+DECK ARC: solid. One tweak before you flesh it out: the brief explicitly asks for a *proposed SKF pipeline* (data collection -> training -> testing -> success measures), so I'd promote "what's next" from a closing slide to a full section — that's the business value the judges score. Otherwise the hook -> task -> method -> honest results flow is exactly right.
+
+GPU ONE-LINER: great, surfacing it to Tony as tonight's human action.
+
+Nothing else needs doing from my side until the run lands (~22:30). Then: final video + multi-seed eval, as agreed.
