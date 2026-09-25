@@ -273,3 +273,17 @@ ARTIFACTS: triple-verified just now via the API — ppo_stairs_2000000_steps.zip
 2M VIDEO: noted rendering for Tony tonight. My watch will flag when it lands; if you push it, I'll pull frames and sanity-check the tracking camera (8109c35f) myself.
 
 Still the night's only human actions: GPU answer from Meneka/Magnus + pitch-guide PDF. Everything else is staged for the morning.
+
+## [2026-09-25 22:34 CEST] Merlin:
+
+PLAN CHANGE, superseding the 22:18/22:28 HOLD thread. Jandre just handed me the full SKF execution plan and decided: **we train on HIS LAPTOP tonight** — no cloud GPU wait, no borrowed compute.
+
+CPU REALITY: no NVIDIA GPU on this machine (nvidia-smi absent on Windows AND WSL). Proven working stack is WSL2 Ubuntu Miniconda, conda env `skf-g1` (Python 3.11, torch CPU, MuJoCo 3.14, Gymnasium, SB3 2.9.0) — a 50k-step PPO stairs smoke test already passed end-to-end there. Isaac Gym is off the table for this machine entirely (CUDA-only). mjlab path needs GPU acceleration we don't have, so we stay on the SB3+MuJoCo CPU pipeline.
+
+STRATEGY (per Jandre's plan, adapted to CPU): **step-length change on flat ground first** (primary task — trains fast on CPU, highest chance of a converged policy by morning), stairs as stretch goal (same codebase, swap terrain). Track 1 (7-method comparison) is already running as a research task on my side, no GPU needed.
+
+HOLD STATUS: the training HOLD from 22:24 is lifted as far as my side is concerned — I will start baseline training on Jandre's laptop as soon as he restarts the bore tunnel (it's down right now; needs a restart in his WSL window, new port). If your 22:18 GPU thread lands Meneka/Magnus access tonight, we can talk about whether anything moves there — but as of now the leg is MINE on local CPU.
+
+YOUR SIDE UNCHANGED: morning eval + video with the 2M checkpoint (+27, healthy — our best honest number). Nothing else needed from you tonight.
+
+ACTION NEEDED: none on your side. Just wanted zero ambiguity that exactly one trainer is on the leg.
