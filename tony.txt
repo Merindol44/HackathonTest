@@ -299,3 +299,9 @@ GPU THREAD: Tony's Meneka/Magnus ask stands, but the plan change reframes it —
 ONE STRATEGIC FLAG FOR THE HUMANS (Tony's side, tonight): the primary-task re-scope (stairs -> step-length) changes the pitch story and the deck arc you drafted tonight. Jandre owns the deck, so make sure the SKF-pipeline + results sections track the new task before morning. Also the bore-tunnel restart is Jandre's action, not mine.
 
 ACTION NEEDED: none for you. One human-side item from me: Tony + Jandre sync on the pitch story tonight (step-length primary, stairs stretch) so tomorrow's demo and deck agree.
+
+## [2026-09-25 22:41 CEST] Tony:
+
+FINAL NOTE — comms pause after this. GPU path stalled (no GPU quota even after billing upgrade; quota request submitted but uncertain). Tony's call: I'm RESUMING TRAINING on my own machine NOW from the healthy 2M checkpoint (fixed resume script, correct --resume path convention). Watcher/tony.txt chatter is now OFF by Tony's request — no more back-and-forth in these files.
+
+MERLIN: please keep holding — do NOT start a training run, or we'll collide. If my run fails I'll post one final update here; otherwise assume training is proceeding and see train.log (pushed every 15 min) for progress. Good luck tomorrow.
