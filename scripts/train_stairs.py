@@ -10,6 +10,7 @@ Example:
 
 import argparse
 import os
+import sys
 from pathlib import Path
 
 from stable_baselines3 import PPO
@@ -132,11 +133,13 @@ def parse_args():
     p.add_argument("--checkpoint-freq", type=int, default=250_000,
                    help="timesteps between checkpoints")
     p.add_argument("--resume", type=str, default=None,
-                   help="path to a .zip model to continue training from")
+                   help="path to a checkpoint to continue training from; "
+                        "the .zip extension is optional and the path is "
+                        "resolved against the directory you run from")
     return p.parse_args()
 
 
-def main():
+def main(orig_cwd):
     args = parse_args()
     run_dir = Path(__file__).resolve().parent.parent / "runs" / args.run_name
     ckpt_dir = run_dir / "checkpoints"
@@ -148,16 +151,45 @@ def main():
     venv = make_vec_env(make_env, n_envs=args.n_envs,
                          seed=args.seed, vec_env_cls=SubprocVecEnv)
 
-    # On resume, load saved normalization stats onto the RAW env. Wrapping an
-    # already-normalized env would normalize twice and corrupt the policy input.
+    # Resolve --resume against the ORIGINAL cwd: main() runs with cwd=scripts/
+    # (for the g1_stairs_env import), so a repo-root-relative path like
+    # runs/x/checkpoints/ppo_stairs_2000000_steps would otherwise be looked up
+    # under scripts/ and silently miss.
+    resume_zip = None
     resume_stats = None
     if args.resume:
-        candidate = Path(args.resume).parent / "vecnormalize.pkl"
-        if candidate.exists():
-            resume_stats = str(candidate)
+        rp = Path(args.resume)
+        if not rp.is_absolute():
+            rp = orig_cwd / rp
+        # PPO.load appends .zip itself; accept the path with or without it.
+        stem = rp.with_suffix("") if rp.suffix == ".zip" else rp
+        if not stem.with_suffix(".zip").exists():
+            sys.exit(f"[train] resume checkpoint not found: {stem}.zip")
+        resume_zip = str(stem)
+        # VecNormalize stats live next to the checkpoint. Try the exact name
+        # first, then anything matching; never silently start fresh on a
+        # trained policy (fresh normalization = wrongly-scaled inputs =
+        # destabilized resume).
+        parent = stem.parent
+        cands = []
+        exact = parent / "vecnormalize.pkl"
+        if exact.exists():
+            cands.append(exact)
+        cands += [p for p in sorted(parent.glob("*vecnormalize*.pkl"))
+                  if p != exact]
+        if cands:
+            resume_stats = str(cands[0])
+            print(f"[train] VecNormalize stats: {resume_stats}")
+        else:
+            print("[train] WARNING: no VecNormalize stats found next to the "
+                  "resume checkpoint -- starting with FRESH normalization. "
+                  "A trained policy resumed this way sees wrongly-scaled "
+                  "inputs and will likely destabilize. Stop now unless that "
+                  "is what you want.")
 
+    # On resume, load saved normalization stats onto the RAW env. Wrapping an
+    # already-normalized env would normalize twice and corrupt the policy input.
     if resume_stats:
-        print(f"Loading VecNormalize stats from {resume_stats}")
         vec_env = VecNormalize.load(resume_stats, venv)
     else:
         # Normalize observations AND rewards; PPO is sensitive to reward scale
@@ -165,9 +197,9 @@ def main():
         vec_env = VecNormalize(venv, norm_obs=True, norm_reward=True,
                                clip_obs=10.0, gamma=0.99)
 
-    if args.resume:
-        print(f"Resuming from {args.resume}")
-        model = PPO.load(args.resume, env=vec_env, seed=args.seed)
+    if resume_zip:
+        print(f"Resuming from {resume_zip}.zip")
+        model = PPO.load(resume_zip, env=vec_env, seed=args.seed)
         model.set_env(vec_env)
     else:
         model = PPO("MlpPolicy", vec_env, seed=args.seed, **PPO_KWARGS)
@@ -199,5 +231,6 @@ def main():
 
 
 if __name__ == "__main__":
+    _orig_cwd = Path.cwd()
     os.chdir(Path(__file__).resolve().parent)  # so `g1_stairs_env` imports
-    main()
+    main(_orig_cwd)
