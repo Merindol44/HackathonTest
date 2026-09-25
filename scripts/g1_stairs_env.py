@@ -76,8 +76,12 @@ OBS_DIM = 29 + 29 + 3 + 3 + 3 + 6  # = 73
 ACTION_SCALE = 0.35  # action in [-1,1] -> +-35% of each joint's half-range
 
 
-def _build_model(g1_xml_path: Path) -> mujoco.MjModel:
-    """Compose G1 + ground + staircase + top platform via MjSpec."""
+def _build_model(g1_xml_path: Path, step_h: float = STEP_H) -> mujoco.MjModel:
+    """Compose G1 + ground + staircase + top platform via MjSpec.
+
+    ``step_h`` sets the per-step height (curriculum training varies it);
+    the default reproduces the original 0.12 m staircase.
+    """
     spec = mujoco.MjSpec()
     # MuJoCo <3.3: from_file is an instance method (returns None, fills in
     # place). MuJoCo >=3.3: it is a classmethod returning the populated spec.
@@ -92,9 +96,10 @@ def _build_model(g1_xml_path: Path) -> mujoco.MjModel:
         size=[8.0, 8.0, 0.1],
         rgba=[0.92, 0.92, 0.94, 1.0],
     )
-    # Staircase: solid boxes from the ground, step i has top at (i+1)*STEP_H.
+    top_h = N_STEPS * step_h
+    # Staircase: solid boxes from the ground, step i has top at (i+1)*step_h.
     for i in range(N_STEPS):
-        h = (i + 1) * STEP_H
+        h = (i + 1) * step_h
         world.add_geom(
             type=mujoco.mjtGeom.mjGEOM_BOX,
             size=[STEP_D / 2, STAIR_W / 2, h / 2],
@@ -104,8 +109,8 @@ def _build_model(g1_xml_path: Path) -> mujoco.MjModel:
     # Top platform (greenish so it reads as the goal in videos).
     world.add_geom(
         type=mujoco.mjtGeom.mjGEOM_BOX,
-        size=[PLAT_LEN / 2, STAIR_W / 2, TOP_H / 2],
-        pos=[X0 + N_STEPS * STEP_D + PLAT_LEN / 2, 0.0, TOP_H / 2],
+        size=[PLAT_LEN / 2, STAIR_W / 2, top_h / 2],
+        pos=[X0 + N_STEPS * STEP_D + PLAT_LEN / 2, 0.0, top_h / 2],
         rgba=[0.30, 0.55, 0.35, 1.0],
     )
     return spec.compile()
@@ -125,12 +130,19 @@ class G1StairsEnv(gym.Env):
 
     metadata = {"render_modes": ["rgb_array"]}
 
-    def __init__(self, g1_xml=None, render_mode=None):
+    def __init__(self, g1_xml=None, render_mode=None, stair_height=STEP_H):
+        """``stair_height``: per-step height in meters (default 0.12).
+
+        Lower values give an easier staircase for curriculum training; the
+        success criterion scales with the resulting platform height.
+        """
         super().__init__()
         if g1_xml is None:
             g1_xml = Path(__file__).resolve().parent.parent / "assets" / \
                 "mujoco_menagerie" / "unitree_g1" / "g1.xml"
-        self.model = _build_model(Path(g1_xml))
+        self._stair_height = float(stair_height)
+        self._top_h = N_STEPS * self._stair_height
+        self.model = _build_model(Path(g1_xml), self._stair_height)
         self.data = mujoco.MjData(self.model)
 
         self.action_space = spaces.Box(-1.0, 1.0, shape=(N_ACT,), dtype=np.float32)
@@ -144,6 +156,12 @@ class G1StairsEnv(gym.Env):
         self._stand_qpos = self.model.key_qpos[
             mujoco.mj_name2id(self.model, _k, "stand")
         ].copy()
+
+        # Success = reach the far end of the top platform. The height bar
+        # scales with stair height so low curriculum stages stay reachable:
+        # pelvis rides ~stand height + platform height when on top.
+        self._success_x = X0 + N_STEPS * STEP_D + 0.6
+        self._success_z = float(self._stand_qpos[2]) + self._top_h - 0.15
 
         # Actuator i drives joint actuator_trnid[i, 0]; cache qpos/dof addresses
         # and joint ranges for the action mapping.
@@ -242,7 +260,7 @@ class G1StairsEnv(gym.Env):
         reward = r_fwd + r_up + W_ALIVE - energy - tilt
 
         fallen = (pelvis_pos[2] < FALL_Z) or (abs(roll) > TILT_LIM) or (abs(pitch) > TILT_LIM)
-        success = (pelvis_pos[0] > SUCCESS_X) and (pelvis_pos[2] > SUCCESS_Z)
+        success = (pelvis_pos[0] > self._success_x) and (pelvis_pos[2] > self._success_z)
 
         terminated, info = False, {"is_success": bool(success)}
         if fallen:

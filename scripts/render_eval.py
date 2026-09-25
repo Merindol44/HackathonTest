@@ -80,6 +80,9 @@ def parse_args():
     p.add_argument("--fps", type=int, default=30)
     p.add_argument("--static-camera", action="store_true",
                    help="disable the pelvis-tracking camera (fixed view)")
+    p.add_argument("--stair-height", type=float, default=0.12,
+                   help="staircase step height in meters (must match the "
+                        "env the model was trained on)")
     return p.parse_args()
 
 
@@ -110,7 +113,7 @@ def main():
     from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
     from g1_stairs_env import G1StairsEnv
 
-    venv = DummyVecEnv([lambda: G1StairsEnv()])
+    venv = DummyVecEnv([lambda: G1StairsEnv(stair_height=args.stair_height)])
     venv = VecNormalize.load(str(vn_path), venv)
     venv.training = False
     venv.norm_reward = False
