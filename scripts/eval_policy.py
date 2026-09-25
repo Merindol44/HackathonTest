@@ -71,10 +71,14 @@ def main():
         model = PPO.load(str(model_path), env=venv)
         model.set_random_seed(seed)
 
+        # Seed ONCE per seed, BEFORE the episode loop. venv.seed() re-resets
+        # the env internally, so calling it after venv.reset() (as before)
+        # made every episode after the first start from the identical RNG
+        # state, and left seed 0's first episode unseeded entirely.
+        venv.seed(seed)
         rewards, lengths, successes = [], [], 0
         for _ in range(args.episodes):
             obs = venv.reset()
-            venv.seed(seed)
             done = False
             ep_rew, ep_len = 0.0, 0
             while not done:
