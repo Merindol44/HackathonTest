@@ -58,7 +58,9 @@ from `scripts/train_stairs.py` unless noted. All runs headless.
 | ~06:10 | — | — | — | — | — | — | — | **Infra note 2:** Python packages wiped again by the restart (`ModuleNotFoundError`). Reinstalled identical versions (torch 2.14.0+cpu, mujoco 3.14.0, gymnasium 1.3.0, sb3 2.9.0) with `--break-system-packages`. H4b relaunched cleanly afterwards. |
 
 ## Checkpoints
-- Best final checkpoint + vecnormalize pkl will be force-added here at the end.
+- **Best: `runs/night_h14_full/final_model.zip` + `vecnormalize.pkl`** (6×0.12 m stairs, harness=0.2, r_level=5.0; max 2 levels, mean 0.7, reward +302) — force-added to git.
+- Also force-added: H6 (3×0.06 m, 2 levels), H10, H11 (3×0.06 m R_LEVEL boost, mean 0.9), H12 (smooth-anneal), H13 (6×0.12 m).
+- All 6 post-H6 commits are on `muse/review-improvements` locally; push to origin pending (no credentials at 06:30 CEST).
 
 **01:52 UTC — `night_h6_stairs` COMPLETED** at 1561568 steps.
 
