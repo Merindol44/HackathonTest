@@ -45,6 +45,7 @@ from `scripts/train_stairs.py` unless noted. All runs headless.
 | 04:58–05:35 | `night_h3_flat` | v1 flat + harness=0.2, resumed from H2 | 906208 (300k new) | +96.2 | 405 | 0 | 0.58 | **Completed.** Expected annealing dip (+323→+42) then recovery (+106, ep_len 251→405). Policy adapts to reduced support. Final anneal to zero next. |
 | 05:38–06:05 | `night_h4_flat` | v1 flat + harness=0.0, resumed from H3 | 934880 (died, 28k new) | +15 | 55 | 0 | 3.75 | **Died after KL explosion** (3.75 > 2.0, watchdog halved LR then silent death). No recovery over 28k steps — the 0.2→0.0 jump is too big; policy reverted to 55-step flailing. **Not restarted identically** (diagnosed config gap, not a fluke). Pivoting: take the good H3 walker (harness=0.2) to stairs instead, continue annealing there. |
 | ~05:45 | — | — | — | — | — | — | — | **Infra note:** runtime service restarted, wiping `/tmp` (supervisor script + state). H4 training survived (separate process). Rewrote supervisor from scratch, fixed a resume bug it had (`--timesteps` on restart now passes only the *remaining* steps to TARGET), re-armed for `night_h4_flat`. No training data lost; branch was already pushed. |
+| ~06:10 | — | — | — | — | — | — | — | **Infra note 2:** Python packages wiped again by the restart (`ModuleNotFoundError`). Reinstalled identical versions (torch 2.14.0+cpu, mujoco 3.14.0, gymnasium 1.3.0, sb3 2.9.0) with `--break-system-packages`. H4b relaunched cleanly afterwards. |
 
 ## Checkpoints
 - Best final checkpoint + vecnormalize pkl will be force-added here at the end.
