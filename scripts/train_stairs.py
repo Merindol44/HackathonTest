@@ -177,6 +177,8 @@ def parse_args():
     p = argparse.ArgumentParser(description="PPO training for G1 stair climbing")
     p.add_argument("--timesteps", type=int, default=3_000_000)
     p.add_argument("--n-envs", type=int, default=8)
+    p.add_argument("--n-steps", type=int, default=2048,
+                   help="PPO rollout steps per env (batch = n-envs * n-steps)")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--run-name", type=str, default="stairs_ppo")
     p.add_argument("--checkpoint-freq", type=int, default=250_000,
@@ -298,7 +300,8 @@ def main(orig_cwd):
         model = PPO.load(resume_zip, env=vec_env, seed=args.seed)
         model.set_env(vec_env)
     else:
-        model = PPO("MlpPolicy", vec_env, seed=args.seed, **PPO_KWARGS)
+        kw = dict(PPO_KWARGS); kw["n_steps"] = args.n_steps
+        model = PPO("MlpPolicy", vec_env, seed=args.seed, **kw)
 
     checkpoint_cb = CheckpointCallback(
         save_freq=max(args.checkpoint_freq // args.n_envs, 1),
