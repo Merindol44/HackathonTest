@@ -46,6 +46,7 @@ from `scripts/train_stairs.py` unless noted. All runs headless.
 | 05:38–06:05 | `night_h4_flat` | v1 flat + harness=0.0, resumed from H3 | 934880 (died, 28k new) | +15 | 55 | 0 | 3.75 | **Died after KL explosion** (3.75 > 2.0, watchdog halved LR then silent death). No recovery over 28k steps — the 0.2→0.0 jump is too big; policy reverted to 55-step flailing. **Not restarted identically** (diagnosed config gap, not a fluke). Pivoting: take the good H3 walker (harness=0.2) to stairs instead, continue annealing there. |
 | 06:12–06:55 | `night_h4b_stairs` | 3×0.06 m stairs + harness=0.2, resumed from H3 | 1209312 (300k new) | +287 | 410 | 0 | 0.93 | **Completed.** KL watchdog fired once (3.9, stair transition) but run recovered. Policy reaches stairs (x=1.7 m in probes) but **levels=0 — never steps up**. Root cause found: level bonus used *pelvis* height (requires lifting whole body), not *foot* height. Fixed to foot-based; testing in H5. |
 | 06:58–07:22 | `night_h5_stairs` | 3×0.06 m stairs + harness=0.2 + **foot-based level bonus**, resumed from H4b | 1410016 (200k new) | +159 | 282 | 0 | — | **Completed. FIRST STAIR CLIMBS.** Probe: 3/5 episodes achieve **levels=1** (foot on first 0.06 m step). The reward fix unlocked stepping-up. Reward dipped (+287→+159) as policy explores the new skill. Consolidating in H6. |
+| 07:23–07:38 | `night_h6_stairs` | 3×0.06 m stairs + harness=0.2, resumed from H5 | 1561568 (150k new) | +219 | 350 | 0 | 1.51 | **Completed (final training run).** 10-episode probe: **max levels=2** (two 0.06 m steps climbed), 4/10 episodes reach levels≥1, mean levels 0.50. **Harness=0.0 probe: total failure** (41–84 steps, 0.00–0.15 m, levels=0) — policy is harness-dependent; annealing incomplete. Best checkpoint: `runs/night_h6_stairs/final_model.zip`. |
 | ~05:45 | — | — | — | — | — | — | — | **Infra note:** runtime service restarted, wiping `/tmp` (supervisor script + state). H4 training survived (separate process). Rewrote supervisor from scratch, fixed a resume bug it had (`--timesteps` on restart now passes only the *remaining* steps to TARGET), re-armed for `night_h4_flat`. No training data lost; branch was already pushed. |
 | ~06:10 | — | — | — | — | — | — | — | **Infra note 2:** Python packages wiped again by the restart (`ModuleNotFoundError`). Reinstalled identical versions (torch 2.14.0+cpu, mujoco 3.14.0, gymnasium 1.3.0, sb3 2.9.0) with `--break-system-packages`. H4b relaunched cleanly afterwards. |
 
@@ -53,3 +54,12 @@ from `scripts/train_stairs.py` unless noted. All runs headless.
 - Best final checkpoint + vecnormalize pkl will be force-added here at the end.
 
 **01:52 UTC — `night_h6_stairs` COMPLETED** at 1561568 steps.
+
+## Night verdict (07:45 CEST)
+Harness curriculum (1.0→0.5→0.2) taught the G1 to walk; a **foot-based level-bonus fix** unlocked stair stepping (max **2 levels** of 3×0.06 m with harness=0.2). **Unsupported (harness=0.0) walking/stair-climbing was NOT achieved** — the 0.2→0.0 anneal step collapsed (KL explosion) and the policy remains harness-dependent. The final 6×0.12 m target was not attempted. Physics fidelity: gravity −9.81, 33.34 kg, 2 ms timestep verified; but all successful locomotion used external harness support (not real physics).
+
+## Recommended next experiment
+1. **Gentler harness anneal on stairs:** 0.2→0.15→0.1→0.05→0.0 with 200k steps each, starting from H6. The 0.2→0.0 jump was too big; intermediate steps may bridge it.
+2. **Apply the other two v1 reward fixes** (velocity band strictly zero outside [0.25,1.0]; per-foot cadence with 0.08 m arm / 0.03 m strike / 30 cap) — they were never implemented.
+3. **Increase R_LEVEL** (2.0→5.0) to strengthen the stair-climbing signal now that the bonus is foot-based and achievable.
+4. Then 6×0.12 m stairs, harness=0.0, for the final real-physics validation.
