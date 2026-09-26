@@ -58,7 +58,7 @@ def _make_follow_camera(model):
 def parse_args():
     p = argparse.ArgumentParser(description="Render v1 stairs policy rollout to MP4")
     p.add_argument("--model", type=str, required=True,
-                   help="path to PPO .zip checkpoint")
+                   help="path to PPO checkpoint (.zip suffix optional)")
     p.add_argument("--vecnormalize", type=str, default=None,
                    help="path to vecnormalize .pkl (default: guessed next to --model)")
     p.add_argument("--out", type=str, default="eval_v2.mp4")
@@ -86,6 +86,11 @@ def main():
     os.chdir(Path(__file__).resolve().parent)
 
     model_path = _resolve(args.model)
+    if model_path.suffix != ".zip":
+        model_path = model_path.with_suffix(".zip")
+    if not model_path.exists():
+        sys.exit(f"[render] checkpoint not found: {model_path}")
+    load_stem = model_path.with_suffix("")  # PPO.load appends .zip itself
     vn_path = _resolve(args.vecnormalize) if args.vecnormalize else None
     if vn_path is None:
         cands = list(model_path.parent.glob("*vecnormalize*.pkl"))
@@ -107,7 +112,7 @@ def main():
     venv = VecNormalize.load(str(vn_path), venv)
     venv.training = False
     venv.norm_reward = False
-    model = PPO.load(str(model_path), env=venv)
+    model = PPO.load(str(load_stem), env=venv)
 
     renderer = _try_init_renderer(venv.envs[0].model)
     if renderer is None:

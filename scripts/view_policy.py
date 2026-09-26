@@ -20,7 +20,7 @@ def parse_args():
     p = argparse.ArgumentParser(description="Watch a trained stairs policy live")
     p.add_argument("--model", type=str,
                    default="runs/night_h14_full/final_model.zip",
-                   help="path to PPO .zip checkpoint")
+                   help="path to PPO checkpoint (.zip suffix optional)")
     p.add_argument("--vecnormalize", type=str, default=None,
                    help="path to vecnormalize .pkl (default: guessed next to --model)")
     p.add_argument("--n-stairs", type=int, default=6)
@@ -45,6 +45,8 @@ def main():
     os.chdir(Path(__file__).resolve().parent)
 
     model_path = _resolve(args.model)
+    if model_path.suffix != ".zip":
+        model_path = model_path.with_suffix(".zip")
     if not model_path.exists():
         sys.exit(f"[view] checkpoint not found: {model_path}\n"
                  "Did you `git pull` the latest branch?")
@@ -74,7 +76,7 @@ def main():
     venv = VecNormalize.load(str(vn_path), DummyVecEnv([lambda: raw_env]))
     venv.training = False
     venv.norm_reward = False
-    model = PPO.load(str(model_path), env=venv)
+    model = PPO.load(str(model_path.with_suffix("")), env=venv)
     env = venv.envs[0]
     print(f"[view] {model_path.name}: {args.n_stairs}x{args.step_h}m stairs, "
           f"harness={args.harness} — ESC to quit")
