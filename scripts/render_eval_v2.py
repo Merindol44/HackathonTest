@@ -14,6 +14,7 @@ Example:
 
 import argparse
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -94,6 +95,12 @@ def main():
     vn_path = _resolve(args.vecnormalize) if args.vecnormalize else None
     if vn_path is None:
         cands = list(model_path.parent.glob("*vecnormalize*.pkl"))
+        # Prefer the stats file whose step number matches the checkpoint.
+        m = re.search(r"(\d+)_steps$", model_path.stem)
+        if m:
+            same = [c for c in cands if m.group(1) in c.name]
+            if same:
+                cands = same
         vn_path = cands[0] if cands else None
     if vn_path is None or not vn_path.exists():
         sys.exit(f"[render] VecNormalize stats not found near {model_path}. "
