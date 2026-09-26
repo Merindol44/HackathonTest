@@ -27,6 +27,8 @@ def parse_args():
     p.add_argument("--step-h", type=float, default=0.12)
     p.add_argument("--harness", type=float, default=0.2)
     p.add_argument("--r-level", type=float, default=5.0)
+    p.add_argument("--env", type=str, default="v1", choices=["v1", "v3"],
+                   help="reward/env version the checkpoint was trained with")
     return p.parse_args()
 
 
@@ -61,11 +63,14 @@ def main():
 
     from stable_baselines3 import PPO
     from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
-    from g1_stairs_env_v2 import G1StairsEnvV1
+    if args.env == "v3":
+        from g1_stairs_env_v3 import G1StairsEnvV3 as EnvCls
+    else:
+        from g1_stairs_env_v2 import G1StairsEnvV1 as EnvCls
     import mujoco.viewer
 
-    raw_env = G1StairsEnvV1(n_stairs=args.n_stairs, step_h=args.step_h,
-                            harness=args.harness, r_level=args.r_level)
+    raw_env = EnvCls(n_stairs=args.n_stairs, step_h=args.step_h,
+                     harness=args.harness, r_level=args.r_level)
     venv = VecNormalize.load(str(vn_path), DummyVecEnv([lambda: raw_env]))
     venv.training = False
     venv.norm_reward = False
