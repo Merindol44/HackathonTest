@@ -208,6 +208,14 @@ class G1StairsEnvV1(G1StairsEnv):
         self._best_x = 0.0
         self._last_prog_step = 0
 
+    def set_harness(self, value: float):
+        """Adjust the fall-harness strength mid-run (for smooth annealing).
+
+        The harness force is recomputed from ``self.harness`` every step, so
+        this takes effect immediately on all live envs.
+        """
+        self.harness = float(max(0.0, min(1.0, value)))
+
     # ------------------------------------------------------------------
     def _gait_ref(self):
         """Reference joint angles for the 12 leg DOFs at the current phase."""

@@ -1,0 +1,73 @@
+{
+  "harness": 0.2,
+  "model": "runs/night_h11_climb/final_model.zip",
+  "n": 10,
+  "max_levels": 2,
+  "mean_levels": 0.9,
+  "frac_ge1": 0.7,
+  "mean_max_x": 1.19,
+  "mean_reward": 382.6,
+  "mean_len": 456.0,
+  "episodes": [
+    {
+      "levels": 0,
+      "max_x": 0.298,
+      "reward": 41.8,
+      "length": 115
+    },
+    {
+      "levels": 1,
+      "max_x": 1.117,
+      "reward": 308.9,
+      "length": 270
+    },
+    {
+      "levels": 1,
+      "max_x": 1.679,
+      "reward": 544.0,
+      "length": 512
+    },
+    {
+      "levels": 2,
+      "max_x": 1.756,
+      "reward": 630.8,
+      "length": 713
+    },
+    {
+      "levels": 1,
+      "max_x": 1.692,
+      "reward": 558.6,
+      "length": 709
+    },
+    {
+      "levels": 1,
+      "max_x": 0.654,
+      "reward": 166.2,
+      "length": 230
+    },
+    {
+      "levels": 0,
+      "max_x": 0.895,
+      "reward": 343.4,
+      "length": 551
+    },
+    {
+      "levels": 0,
+      "max_x": 0.518,
+      "reward": 111.2,
+      "length": 266
+    },
+    {
+      "levels": 1,
+      "max_x": 1.563,
+      "reward": 559.2,
+      "length": 605
+    },
+    {
+      "levels": 2,
+      "max_x": 1.681,
+      "reward": 562.3,
+      "length": 586
+    }
+  ]
+}

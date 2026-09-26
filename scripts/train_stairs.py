@@ -125,6 +125,54 @@ class KLWatchdogCallback(BaseCallback):
         return True
 
 
+class HarnessAnnealCallback(BaseCallback):
+    """Smoothly anneal the fall-harness strength inside a single run.
+
+    Linearly interpolates harness from ``h_start`` to ``h_end`` over
+    ``anneal_steps`` *new* timesteps of this run (measured from the timestep
+    counter at training start, so resumes schedule correctly). Applies the
+    value to every env via ``env_method("set_harness", ...)`` at each
+    rollout end and logs it as ``harness/cur``.
+
+    Rationale: discrete harness drops between stages (0.2 -> 0.15 -> 0.10)
+    shock the policy (KL spike, LR halving, walker regression). A smooth
+    ramp lets PPO adapt its balance controller continuously.
+    """
+
+    def __init__(self, h_start, h_end, anneal_steps, verbose=0):
+        super().__init__(verbose)
+        self.h_start = float(h_start)
+        self.h_end = float(h_end)
+        self.anneal_steps = int(anneal_steps)
+        self._t0 = None
+
+    def _on_training_start(self) -> None:
+        self._t0 = self.model.num_timesteps
+        self._apply(self.h_start)
+
+    def _on_step(self) -> bool:
+        return True
+
+    def _apply(self, h):
+        try:
+            self.model.get_env().env_method("set_harness", h)
+        except Exception as exc:  # never kill a run over the schedule
+            print(f"[harness-anneal] env_method failed: {exc}", flush=True)
+        self.logger.record("harness/cur", h)
+
+    def _on_rollout_end(self) -> bool:
+        if self._t0 is None:
+            self._t0 = self.model.num_timesteps
+        done = self.model.num_timesteps - self._t0
+        frac = min(1.0, max(0.0, done / max(1, self.anneal_steps)))
+        h = self.h_start + (self.h_end - self.h_start) * frac
+        self._apply(h)
+        if self.verbose:
+            print(f"[harness-anneal] step {done}/{self.anneal_steps} "
+                  f"harness={h:.3f}", flush=True)
+        return True
+
+
 def parse_args():
     p = argparse.ArgumentParser(description="PPO training for G1 stair climbing")
     p.add_argument("--timesteps", type=int, default=3_000_000)
@@ -152,6 +200,12 @@ def parse_args():
                    help="v1 only: fall-harness support strength 0..1 (training wheels)")
     p.add_argument("--r-level", type=float, default=2.0,
                    help="v1 only: reward per new stair level reached")
+    p.add_argument("--harness-end", type=float, default=None,
+                   help="v1 only: if set, smoothly anneal harness from "
+                        "--harness to this value inside the run")
+    p.add_argument("--harness-anneal-steps", type=int, default=0,
+                   help="v1 only: new timesteps over which the harness "
+                        "anneal ramps (0 = no anneal)")
     return p.parse_args()
 
 
@@ -250,6 +304,14 @@ def main(orig_cwd):
         patience=3,
     )
     callbacks = CallbackList([checkpoint_cb, kl_watchdog])
+    if args.harness_end is not None and args.harness_anneal_steps > 0:
+        anneal_cb = HarnessAnnealCallback(
+            h_start=args.harness, h_end=args.harness_end,
+            anneal_steps=args.harness_anneal_steps, verbose=1,
+        )
+        callbacks = CallbackList([checkpoint_cb, kl_watchdog, anneal_cb])
+        print(f"[train] harness anneal: {args.harness} -> {args.harness_end} "
+              f"over {args.harness_anneal_steps} new timesteps")
 
     print(f"Training {args.timesteps} timesteps x {args.n_envs} envs "
           f"-> {run_dir}")
