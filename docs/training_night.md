@@ -3,11 +3,11 @@
 <!-- LIVE-STATUS-START -->
 ## Live status (auto-updated)
 
-- **Updated:** 04:10 UTC (06:10 CEST)
-- **Run:** `night_h14_full` (continuation coordinator)
-- **State:** RUNNING — 6×0.12 m stairs, harness=0.2, r_level=5.0 (300k steps, resumed from H13 2.17M); pushing for 3+ levels
-- **Timesteps:** 2167776 → +300k planned
-- **Restarts this run:** 0
+- **Updated:** 04:32 UTC (06:32 CEST)
+- **Run:** none (continuation coordinator)
+- **State:** NIGHT COMPLETE — all training done. Best checkpoint: `runs/night_h14_full/final_model.zip` (6×0.12 m, harness=0.2, 2 levels). Unsupported climbing NOT achieved. No trainers running.
+- **Timesteps:** final total 2467776
+- **Restarts this run:** 1 infra-caused death (package layer wiped ~04:10 UTC), resumed from checkpoint 2217776
 <!-- LIVE-STATUS-END -->
 
 **Orders in effect:** (1) auto-restart any dead run from its latest checkpoint
@@ -53,6 +53,7 @@ from `scripts/train_stairs.py` unless noted. All runs headless.
 | 09:01–09:18 | `night_h11_climb` | 3×0.06 m stairs + harness=0.2 + **R_LEVEL 2.0→5.0** (new `--r-level` flag), resumed from H6 | 1864672 (300k new) | +271 | 372 | 0 | 0.49 | **Completed. Stronger climber.** Reward +219→+271, KL healthy. Probe @0.2: **mean_levels 0.9 (was 0.5), 7/10 reach ≥1 level** (was 4/10), max 2/3, mean_max_x=1.19 m. Probe @0.0: still total failure. R_LEVEL boost helped but no full 3-level climbs yet. **New idea for the anneal wall:** discrete harness drops shock the policy (KL spike → LR halving → walker regression). Implementing **smooth within-run harness annealing** (`set_harness` + `HarnessAnnealCallback`, `--harness-end/--harness-anneal-steps`) and testing 0.2→0.0 over 800k steps on flat (H12). |
 | 09:24–10:07 | `night_h12_anneal` | flat + **smooth harness anneal 0.2→0.0** over 800k new steps, resumed from H6 | 2364384 (800k new) | +63.8 | 78 | 0 | 0.59 | **Completed. Smooth anneal ALSO FAILED.** Harness ramped 0.2→0.0 cleanly (KL healthy throughout, no explosions). But the walker still died: ep_len 78 at harness≈0. Probe @0.0 (flat AND stairs): levels=0, mean_max_x=0.23 m. **Diagnostic:** mid-anneal checkpoints show the walker was already dead by harness≈0.125 (300k into the ramp); H6 probed on flat @0.2 walks 2.03 m fine, so it was the anneal — not a domain shift — that killed it. **Conclusion: the policy cannot learn unsupported balance through harness annealing (discrete or smooth). The harness was doing the balancing; PPO never learned a balance controller.** Unsupported walking/climbing NOT achieved tonight. Pivoting remaining budget to the best harness-assisted result: the original 6×0.12 m target geometry at harness=0.2 (H13). |
 | 10:09–10:26 | `night_h13_full` | **6×0.12 m stairs** (original target geometry) + harness=0.2 + r_level=5.0, resumed from H11 | 2167776 (300k new) | +281 | 375 | 0 | 0.56 | **Completed. Climbs the big stairs (with harness).** Reward +271→+281, KL healthy. Probe @0.2: **max_levels=2, mean_levels=0.9, 6/10 reach ≥1 level** of the 0.12 m steps, mean_max_x=1.16 m. The 0.12 m steps are climbable with harness support. Probe @0.0: still failure (0.1 m). Extending with H14 (another 300k) to push for more levels. |
+| 10:28–10:45 | `night_h14_full` | 6×0.12 m + harness=0.2 + r_level=5.0, resumed from H13 | 2467776 (300k new) | +302.5 (probe) | 421 (probe) | 1 infra | — | **Completed. Climbing plateaus at ~2 levels.** Probe @0.2: max_levels=2, mean_levels=0.7, 6/10 ≥1 level, mean_max_x=1.1 m. Mean levels 0.9→0.7 vs H13 (noise/plateau — more steps won't help). Probe @0.0: failure. **INFRA FAILURE mid-run:** at ~04:10 UTC the VM's Python package layer was wiped (torch/mujoco/sb3/gymnasium gone from filesystem; trainer died at 2217776). All ~/workspace files intact. Reinstalled exact pins (torch 2.14.0+cpu, sb3 2.9.0, mujoco 3.14.0, gymnasium 1.3.0) and resumed from checkpoint 2217776 with 250k steps. **Night verdict: best checkpoint = H14 on 6×0.12 m @0.2 (2 levels, harness-assisted). Unsupported climbing NOT achieved.** |
 | ~05:45 | — | — | — | — | — | — | — | **Infra note:** runtime service restarted, wiping `/tmp` (supervisor script + state). H4 training survived (separate process). Rewrote supervisor from scratch, fixed a resume bug it had (`--timesteps` on restart now passes only the *remaining* steps to TARGET), re-armed for `night_h4_flat`. No training data lost; branch was already pushed. |
 | ~06:10 | — | — | — | — | — | — | — | **Infra note 2:** Python packages wiped again by the restart (`ModuleNotFoundError`). Reinstalled identical versions (torch 2.14.0+cpu, mujoco 3.14.0, gymnasium 1.3.0, sb3 2.9.0) with `--break-system-packages`. H4b relaunched cleanly afterwards. |
 
