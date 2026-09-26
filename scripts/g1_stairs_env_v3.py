@@ -2,8 +2,8 @@
 
 Same 73-dim proprioceptive observation and 29-dim action space as v1, same
 parameterized geometry (n_stairs, step_h). Reward v3 keeps the v1 terms that
-worked (velocity band, clearance, knee lift, anti-dodge, alive, energy/tilt
-penalties, harness-force penalty, fall/success terminals, anti-stand) and
+worked (velocity band, clearance, knee lift, anti-dodge, alive, energy
+penalty, harness-force penalty, fall/success terminals, anti-stand) and
 adds all eight brainstorm ideas:
 
 1. Potential-based dense progress: every-step shaping from the distance to
@@ -42,7 +42,6 @@ from g1_stairs_env import (
     TILT_LIM,
     W_ALIVE,
     W_ENERGY,
-    W_TILT,
     X0,
     G1StairsEnv,
     _quat_to_euler,
@@ -85,6 +84,13 @@ IMPACT_VMAX = 3.0  # clip impact speed (m/s)
 # Idea 8: pelvis height tracking (replaces r_up).
 W_HZ = 1.0
 HZ_K = 25.0
+
+# Torso posture (v4): reward an upright torso with a slight forward lean.
+# Replaces the old quadratic tilt penalty around zero pitch — the optimum
+# is now a small forward pitch, not exactly zero (positive pitch = forward).
+W_POSTURE = 1.0
+POSTURE_K = 12.0
+PITCH_TGT = 0.08   # ~4.6 deg forward lean ("very tiny bit")
 
 # Idea 5: harness budget — support fades linearly to zero within each
 # episode over this many steps (wean inside the run, not across runs).
@@ -368,7 +374,10 @@ class G1StairsEnvV3(G1StairsEnv):
         r_band = W_BAND * _band_vx(float(vx))
         r_dodge = -(W_VY * abs(float(vy)) + W_Y * abs(float(pelvis_pos[1])))
         energy = W_ENERGY * float(np.sum(torques ** 2))
-        tilt = W_TILT * float(roll ** 2 + pitch ** 2)
+        # Torso posture: upright torso + slight forward lean (exp kernel,
+        # max at roll=0, pitch=PITCH_TGT). Replaces the old tilt penalty.
+        r_posture = W_POSTURE * float(np.exp(
+            -POSTURE_K * (roll ** 2 + (pitch - PITCH_TGT) ** 2)))
 
         # Reference-gait tracking: imitation prior for the walking pattern.
         r_track = 0.0
@@ -462,7 +471,7 @@ class G1StairsEnvV3(G1StairsEnv):
         self._prev_phi = phi
 
         reward = (
-            r_band + r_dodge + W_ALIVE - energy - tilt
+            r_band + r_dodge + W_ALIVE - energy + r_posture
             + r_clear + r_knee + r_level + r_track
             + r_pot + r_bal + r_alt + r_place + r_soft + r_h
             - HARNESS_W * harness_f - HARNESS_MW * harness_m
@@ -499,7 +508,7 @@ class G1StairsEnvV3(G1StairsEnv):
                 r_band=r_band, r_h=r_h, r_clear=r_clear, r_knee=r_knee,
                 r_level=r_level, r_alt=r_alt, r_place=r_place, r_soft=r_soft,
                 r_bal=r_bal, r_pot=r_pot, r_dodge=r_dodge,
-                energy=energy, tilt=tilt,
+                energy=energy, r_posture=r_posture,
                 levels=sum(1 for v in self._levels.values() if v),
                 levels_full=n_full, alt_strikes=self._alt_strikes,
                 pelvis_x=float(pelvis_pos[0]), pelvis_z=float(pelvis_pos[2]),
