@@ -26,6 +26,26 @@ if os.environ.get("MUJOCO_GL") is None:
 
 import numpy as np
 
+# Windows torch>=2.14 workaround: torch's C++ zip reader fails with a miniz
+# error when reading SB3 checkpoints through ZipExtFile streams, even though
+# the files are intact. Buffering entries through BytesIO sidesteps it.
+# Harmless on other platforms (just an in-memory copy).
+import io as _io
+import zipfile as _zipfile
+_orig_zip_open = _zipfile.ZipFile.open
+
+
+def _buffered_zip_open(self, name, mode="r", *args, **kwargs):
+    f = _orig_zip_open(self, name, mode, *args, **kwargs)
+    if mode == "r":
+        data = f.read()
+        f.close()
+        return _io.BytesIO(data)
+    return f
+
+
+_zipfile.ZipFile.open = _buffered_zip_open
+
 
 def _try_init_renderer(model):
     import mujoco

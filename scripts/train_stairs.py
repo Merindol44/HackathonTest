@@ -212,6 +212,10 @@ def parse_args():
     p.add_argument("--harness-anneal-steps", type=int, default=0,
                    help="v1 only: new timesteps over which the harness "
                         "anneal ramps (0 = no anneal)")
+    p.add_argument("--tensorboard-log", type=str, default=None,
+                   help="if set, write TensorBoard event files to this dir "
+                        "(e.g. runs/<run-name>/tb); view live with "
+                        "`tensorboard --logdir <dir>`")
     return p.parse_args()
 
 
@@ -301,6 +305,9 @@ def main(orig_cwd):
         model.set_env(vec_env)
     else:
         kw = dict(PPO_KWARGS); kw["n_steps"] = args.n_steps
+        if args.tensorboard_log:
+            kw["tensorboard_log"] = args.tensorboard_log
+            print(f"[train] TensorBoard logging to {args.tensorboard_log}")
         model = PPO("MlpPolicy", vec_env, seed=args.seed, **kw)
 
     checkpoint_cb = CheckpointCallback(
