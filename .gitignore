@@ -12,3 +12,4 @@ runs/*/eval.mp4
 
 # Robot model meshes (56M) — teammates fetch via scripts/download_g1_model.sh
 assets/
+venv_g1/
