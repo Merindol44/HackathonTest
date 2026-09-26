@@ -185,9 +185,13 @@ def parse_args():
                    help="path to a checkpoint to continue training from; "
                         "the .zip extension is optional and the path is "
                         "resolved against the directory you run from")
-    p.add_argument("--env", type=str, default="v0", choices=["v0", "v1"],
+    p.add_argument("--env", type=str, default="v0", choices=["v0", "v1", "v3"],
                    help="v0 = original env, v1 = band+clearance rewards with "
-                        "parameterized stair geometry")
+                        "parameterized stair geometry, v3 = v1 + all eight "
+                        "brainstorm reward ideas (dense progress potential, "
+                        "alternating cadence, single-support balance, split "
+                        "level bonus, harness budget, foot placement, "
+                        "landing softness, pelvis height tracking)")
     p.add_argument("--n-stairs", type=int, default=6,
                    help="v1 only: number of steps (0 = flat ground)")
     p.add_argument("--step-h", type=float, default=0.12,
@@ -219,6 +223,11 @@ def main(orig_cwd):
         if args.env == "v1":
             from g1_stairs_env_v2 import G1StairsEnvV1  # noqa: E402
             return G1StairsEnvV1(n_stairs=args.n_stairs, step_h=args.step_h,
+                                 track_w=args.track_w, anti_stand=args.anti_stand,
+                                 harness=args.harness, r_level=args.r_level)
+        if args.env == "v3":
+            from g1_stairs_env_v3 import G1StairsEnvV3  # noqa: E402
+            return G1StairsEnvV3(n_stairs=args.n_stairs, step_h=args.step_h,
                                  track_w=args.track_w, anti_stand=args.anti_stand,
                                  harness=args.harness, r_level=args.r_level)
         return G1StairsEnv()
