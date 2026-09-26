@@ -59,6 +59,20 @@ MAX_STRIKES = 30
 W_VY = 0.4        # anti side-dodge
 W_Y = 0.2
 
+# Fall-harness (training wheels): a virtual support that holds the pelvis
+# upright at standing height while the policy learns leg control. The policy
+# is penalized for the support force used, so it is incentivized to support
+# its own weight; anneal `harness` to 0 for full physics.
+HARNESS_ZTGT = 0.78   # target pelvis height
+HARNESS_KP = 8000.0
+HARNESS_KD = 400.0
+HARNESS_FMAX = 800.0
+HARNESS_TILT_KP = 400.0   # righting moment gains (torso stabilization)
+HARNESS_TILT_KD = 40.0
+HARNESS_MMAX = 300.0
+HARNESS_W = 0.002      # penalty per Newton of harness force used
+HARNESS_MW = 0.004     # penalty per Nm of harness moment used
+
 # Reference-gait tracking (imitation prior for the hard-to-discover walking
 # pattern). Open-loop phase; the task rewards still select real locomotion.
 GAIT_FREQ = 1.8          # Hz, human-like cadence
@@ -130,7 +144,7 @@ class G1StairsEnvV1(G1StairsEnv):
     """
 
     def __init__(self, g1_xml=None, n_stairs=6, step_h=0.12, render_mode=None,
-                 track_w=0.0, anti_stand=False):
+                 track_w=0.0, anti_stand=False, harness=0.0):
         # Bypass G1StairsEnv.__init__ (it hardcodes v0 geometry) and repeat
         # the setup with our builder. Observation/action spaces identical.
         import gymnasium as gym
@@ -144,6 +158,7 @@ class G1StairsEnvV1(G1StairsEnv):
         self.step_h = float(step_h)
         self.track_w = float(track_w)
         self.anti_stand = bool(anti_stand)
+        self.harness = float(harness)
         self.model = _build_model_v1(Path(g1_xml), self.n_stairs, self.step_h)
         self.data = mujoco.MjData(self.model)
 
@@ -234,7 +249,28 @@ class G1StairsEnvV1(G1StairsEnv):
         d = self.data
         for _ in range(N_SUBSTEPS):
             d.ctrl[:] = target
+            if self.harness > 0.0:
+                pz = d.xpos[self._pelvis][2]
+                vz = d.qvel[2]
+                fz = self.harness * (HARNESS_KP * (HARNESS_ZTGT - pz)
+                                    - HARNESS_KD * vz)
+                d.xfrc_applied[self._pelvis, 2] = float(
+                    np.clip(fz, 0.0, HARNESS_FMAX))
+                # Righting moments on the torso (training wheels for balance).
+                roll, pitch, _ = _quat_to_euler(d.qpos[3:7])
+                # angular velocity of pelvis body:
+                wx, wy = d.qvel[3], d.qvel[4]
+                mx = self.harness * (-HARNESS_TILT_KP * roll - HARNESS_TILT_KD * wx)
+                my = self.harness * (-HARNESS_TILT_KP * pitch - HARNESS_TILT_KD * wy)
+                d.xfrc_applied[self._pelvis, 3] = float(
+                    np.clip(mx, -HARNESS_MMAX, HARNESS_MMAX))
+                d.xfrc_applied[self._pelvis, 4] = float(
+                    np.clip(my, -HARNESS_MMAX, HARNESS_MMAX))
             mujoco.mj_step(self.model, d)
+        harness_f = float(d.xfrc_applied[self._pelvis, 2])
+        harness_m = float(abs(d.xfrc_applied[self._pelvis, 3])
+                          + abs(d.xfrc_applied[self._pelvis, 4]))
+        d.xfrc_applied[self._pelvis, :] = 0.0
         self._steps += 1
 
         pelvis_pos = d.xpos[self._pelvis]
@@ -291,6 +327,7 @@ class G1StairsEnvV1(G1StairsEnv):
         reward = (
             r_band + r_up + r_dodge + W_ALIVE - energy - tilt
             + r_clear + r_knee + r_level + r_strike + r_track
+            - HARNESS_W * harness_f - HARNESS_MW * harness_m
         )
 
         fallen = (pelvis_pos[2] < FALL_Z) or (abs(roll) > TILT_LIM) or (abs(pitch) > TILT_LIM)

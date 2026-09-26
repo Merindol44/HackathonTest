@@ -148,6 +148,8 @@ def parse_args():
                    help="v1 only: reference-gait tracking reward weight")
     p.add_argument("--anti-stand", action="store_true",
                    help="v1 only: truncate episodes with no forward progress")
+    p.add_argument("--harness", type=float, default=0.0,
+                   help="v1 only: fall-harness support strength 0..1 (training wheels)")
     return p.parse_args()
 
 
@@ -161,7 +163,8 @@ def main(orig_cwd):
         if args.env == "v1":
             from g1_stairs_env_v2 import G1StairsEnvV1  # noqa: E402
             return G1StairsEnvV1(n_stairs=args.n_stairs, step_h=args.step_h,
-                                 track_w=args.track_w, anti_stand=args.anti_stand)
+                                 track_w=args.track_w, anti_stand=args.anti_stand,
+                                 harness=args.harness)
         return G1StairsEnv()
 
     print(f"[train] env={args.env} n_stairs={args.n_stairs} step_h={args.step_h}")
