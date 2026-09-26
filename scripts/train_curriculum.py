@@ -108,7 +108,10 @@ def main():
                     reset_num_timesteps=False)
 
         stage_model = ckpt_dir / f"curriculum_stage{idx}_h{height:.2f}"
-        model.save(str(stage_model))
+        # NOTE: PPO.save() writes the literal path (no auto .zip), while
+        # PPO.load() falls back to path+".zip" when the file is missing --
+        # so always save WITH the extension to keep save/load symmetric.
+        model.save(str(stage_model) + ".zip")
         stats_path = str(ckpt_dir / f"curriculum_stage{idx}_vecnormalize.pkl")
         vec_env.save(stats_path)
 
