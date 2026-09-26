@@ -1,0 +1,73 @@
+{
+  "harness": 0.0,
+  "model": "runs/night_h13_full/final_model.zip",
+  "n": 10,
+  "max_levels": 0,
+  "mean_levels": 0.0,
+  "frac_ge1": 0.0,
+  "mean_max_x": 0.1,
+  "mean_reward": 25.6,
+  "mean_len": 58.0,
+  "episodes": [
+    {
+      "levels": 0,
+      "max_x": 0.086,
+      "reward": 5.1,
+      "length": 40
+    },
+    {
+      "levels": 0,
+      "max_x": 0.089,
+      "reward": 9.7,
+      "length": 44
+    },
+    {
+      "levels": 0,
+      "max_x": 0.197,
+      "reward": 69.9,
+      "length": 73
+    },
+    {
+      "levels": 0,
+      "max_x": 0.069,
+      "reward": 9.6,
+      "length": 36
+    },
+    {
+      "levels": 0,
+      "max_x": 0.098,
+      "reward": 51.8,
+      "length": 89
+    },
+    {
+      "levels": 0,
+      "max_x": 0.079,
+      "reward": 10.5,
+      "length": 36
+    },
+    {
+      "levels": 0,
+      "max_x": 0.097,
+      "reward": 40.9,
+      "length": 72
+    },
+    {
+      "levels": 0,
+      "max_x": 0.02,
+      "reward": 7.6,
+      "length": 49
+    },
+    {
+      "levels": 0,
+      "max_x": 0.167,
+      "reward": 51.7,
+      "length": 92
+    },
+    {
+      "levels": 0,
+      "max_x": 0.053,
+      "reward": -1.0,
+      "length": 45
+    }
+  ]
+}
