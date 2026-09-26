@@ -43,6 +43,7 @@ from `scripts/train_stairs.py` unless noted. All runs headless.
 | 03:40–04:15 | `night_h1_flat` | v1 flat + harness=1.0 + anti-stand, from scratch | 303104/300k | +163 | 523 | 0.05 | — | **Completed. BREAKTHROUGH.** Episodes 6× longer (523 vs ~80), reward −3.5→+163, and the first non-zero success_rate of the night (5% walk 6 m). Rollout probe: policy walks 2.7–4.4 m upright (pelvis_z ~0.72) with harness. The training-wheels curriculum works — PPO discovers walking when episodes are long. Annealing harness next. |
 | 04:18–04:55 | `night_h2_flat` | v1 flat + harness=0.5, resumed from H1 | 603104 (300k new) | +323 | 627 | 0.02 | 0.56 | **Completed.** Reward +163→+323 as harness halved — the policy supports its own weight more (less harness penalty) and walks better. Annealing continues. |
 | 04:58–05:35 | `night_h3_flat` | v1 flat + harness=0.2, resumed from H2 | 906208 (300k new) | +96.2 | 405 | 0 | 0.58 | **Completed.** Expected annealing dip (+323→+42) then recovery (+106, ep_len 251→405). Policy adapts to reduced support. Final anneal to zero next. |
+| ~05:45 | — | — | — | — | — | — | — | **Infra note:** runtime service restarted, wiping `/tmp` (supervisor script + state). H4 training survived (separate process). Rewrote supervisor from scratch, fixed a resume bug it had (`--timesteps` on restart now passes only the *remaining* steps to TARGET), re-armed for `night_h4_flat`. No training data lost; branch was already pushed. |
 
 ## Checkpoints
 - Best final checkpoint + vecnormalize pkl will be force-added here at the end.
