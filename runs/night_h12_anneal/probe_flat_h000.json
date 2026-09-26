@@ -1,0 +1,73 @@
+{
+  "harness": 0.0,
+  "model": "runs/night_h12_anneal/final_model.zip",
+  "n": 10,
+  "max_levels": 0,
+  "mean_levels": 0.0,
+  "frac_ge1": 0.0,
+  "mean_max_x": 0.23,
+  "mean_reward": 66.3,
+  "mean_len": 76.0,
+  "episodes": [
+    {
+      "levels": 0,
+      "max_x": 0.259,
+      "reward": 77.5,
+      "length": 70
+    },
+    {
+      "levels": 0,
+      "max_x": 0.247,
+      "reward": 60.9,
+      "length": 71
+    },
+    {
+      "levels": 0,
+      "max_x": 0.335,
+      "reward": 120.0,
+      "length": 105
+    },
+    {
+      "levels": 0,
+      "max_x": 0.235,
+      "reward": 60.1,
+      "length": 74
+    },
+    {
+      "levels": 0,
+      "max_x": 0.44,
+      "reward": 100.4,
+      "length": 89
+    },
+    {
+      "levels": 0,
+      "max_x": 0.098,
+      "reward": 16.6,
+      "length": 53
+    },
+    {
+      "levels": 0,
+      "max_x": 0.106,
+      "reward": 50.9,
+      "length": 67
+    },
+    {
+      "levels": 0,
+      "max_x": 0.257,
+      "reward": 91.2,
+      "length": 83
+    },
+    {
+      "levels": 0,
+      "max_x": 0.162,
+      "reward": 30.0,
+      "length": 67
+    },
+    {
+      "levels": 0,
+      "max_x": 0.131,
+      "reward": 55.5,
+      "length": 77
+    }
+  ]
+}
