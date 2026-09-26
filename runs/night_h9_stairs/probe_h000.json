@@ -1,0 +1,73 @@
+{
+  "harness": 0.0,
+  "model": "runs/night_h9_stairs/final_model.zip",
+  "n": 10,
+  "max_levels": 0,
+  "mean_levels": 0.0,
+  "frac_ge1": 0.0,
+  "mean_max_x": 0.14,
+  "mean_reward": 34.8,
+  "mean_len": 71.0,
+  "episodes": [
+    {
+      "levels": 0,
+      "max_x": 0.29,
+      "reward": 62.8,
+      "length": 61
+    },
+    {
+      "levels": 0,
+      "max_x": 0.168,
+      "reward": 50.5,
+      "length": 98
+    },
+    {
+      "levels": 0,
+      "max_x": 0.049,
+      "reward": 19.6,
+      "length": 58
+    },
+    {
+      "levels": 0,
+      "max_x": 0.131,
+      "reward": 22.2,
+      "length": 72
+    },
+    {
+      "levels": 0,
+      "max_x": 0.16,
+      "reward": 38.1,
+      "length": 58
+    },
+    {
+      "levels": 0,
+      "max_x": 0.162,
+      "reward": 17.3,
+      "length": 71
+    },
+    {
+      "levels": 0,
+      "max_x": 0.029,
+      "reward": 19.8,
+      "length": 110
+    },
+    {
+      "levels": 0,
+      "max_x": 0.163,
+      "reward": 72.9,
+      "length": 92
+    },
+    {
+      "levels": 0,
+      "max_x": 0.124,
+      "reward": 22.1,
+      "length": 36
+    },
+    {
+      "levels": 0,
+      "max_x": 0.1,
+      "reward": 22.9,
+      "length": 58
+    }
+  ]
+}

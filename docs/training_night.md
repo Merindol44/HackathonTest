@@ -3,10 +3,10 @@
 <!-- LIVE-STATUS-START -->
 ## Live status (auto-updated)
 
-- **Updated:** 02:31 UTC (04:31 CEST)
-- **Run:** `night_h9_stairs` (continuation coordinator)
-- **State:** RUNNING — consolidation at harness=0.10 (300k steps, resumed from H8 1.96M); walker recovery attempt
-- **Timesteps:** 1962976 → +300k planned
+- **Updated:** 02:50 UTC (04:50 CEST)
+- **Run:** `night_h10_flat` (continuation coordinator)
+- **State:** RUNNING — walker recovery on flat ground, harness=0.10 (200k steps, resumed from H9 2.27M)
+- **Timesteps:** 2266080 → +200k planned
 - **Restarts this run:** 0
 <!-- LIVE-STATUS-END -->
 
@@ -48,6 +48,7 @@ from `scripts/train_stairs.py` unless noted. All runs headless.
 | 07:23–07:38 | `night_h6_stairs` | 3×0.06 m stairs + harness=0.2, resumed from H5 | 1561568 (150k new) | +219 | 350 | 0 | 1.51 | **Completed (final training run).** 10-episode probe: **max levels=2** (two 0.06 m steps climbed), 4/10 episodes reach levels≥1, mean levels 0.50. **Harness=0.0 probe: total failure** (41–84 steps, 0.00–0.15 m, levels=0) — policy is harness-dependent; annealing incomplete. Best checkpoint: `runs/night_h6_stairs/final_model.zip`. |
 | 08:04–08:15 | `night_h7_stairs` | 3×0.06 m stairs + harness=0.15, resumed from H6 (continuation coordinator) | 1762272 (200k new) | +87.9 | 169 | 0 | 1.77 | **Completed. Annealing dip.** KL watchdog fired once at resume start (harness-change shock, LR 3e-4→1.5e-4) then KL stayed healthy (1.77). Reward +219→+88, ep_len 350→169. Probe @0.15: max levels=2, mean 0.2, 1/10 reach ≥1, mean_max_x=0.4 m — walking regressed. Probe @0.0: still total failure (levels=0, 0.05 m). No KL explosion; reward trending up at end (+77.6→+87.9). Continuing anneal to 0.10. |
 | 08:18–08:29 | `night_h8_stairs` | 3×0.06 m stairs + harness=0.10, resumed from H7 | 1962976 (200k new) | +52.2 | 91.7 | 0 | 0.50 | **Completed. Walker dying.** KL healthy (0.50, no explosion; watchdog fired twice at resume, LR→7.5e-05). But reward +88→+52, ep_len 169→92, and probe @0.10 shows **levels=0 everywhere, mean_max_x=0.22 m** — policy can no longer walk forward to the stairs. Probe @0.0: still failure. Stepping down blindly would kill the walker; running a **consolidation stage at harness=0.10** (H9, 300k) before any further anneal. |
+| 08:31–08:47 | `night_h9_stairs` | 3×0.06 m stairs + harness=0.10 (consolidation), resumed from H8 | 2266080 (300k new) | +60.2 | 91.6 | 0 | 0.52 | **Completed. Consolidation FAILED to recover the walker.** Reward +52→+60 (marginal), ep_len flat (91.7→91.6). Probe @0.10: max_levels=1 (one lucky ep), mean 0.1, mean_max_x=0.3 m — still cannot walk to stairs. 300k extra steps at 0.10 did not rebuild walking. **Pivot:** stairs are a harder locomotion task than the broken walker can handle; moving recovery to **flat ground** (H10, harness=0.10, 200k). If flat walking recovers, anneal 0.05→0.0 on flat, then reintroduce stairs. |
 | ~05:45 | — | — | — | — | — | — | — | **Infra note:** runtime service restarted, wiping `/tmp` (supervisor script + state). H4 training survived (separate process). Rewrote supervisor from scratch, fixed a resume bug it had (`--timesteps` on restart now passes only the *remaining* steps to TARGET), re-armed for `night_h4_flat`. No training data lost; branch was already pushed. |
 | ~06:10 | — | — | — | — | — | — | — | **Infra note 2:** Python packages wiped again by the restart (`ModuleNotFoundError`). Reinstalled identical versions (torch 2.14.0+cpu, mujoco 3.14.0, gymnasium 1.3.0, sb3 2.9.0) with `--break-system-packages`. H4b relaunched cleanly afterwards. |
 
