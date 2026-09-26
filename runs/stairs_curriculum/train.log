@@ -6617,3 +6617,195 @@ subprocess.CalledProcessError: Command '['/home/hatch/workspace/hackathon/.venv/
 |    std                  | 0.567     |
 |    value_loss           | 0.0434    |
 ---------------------------------------
+---------------------------------------
+| rollout/                |           |
+|    ep_len_mean          | 99.7      |
+|    ep_rew_mean          | 137       |
+|    success_rate         | 0         |
+| time/                   |           |
+|    fps                  | 526       |
+|    iterations           | 55        |
+|    time_elapsed         | 1711      |
+|    total_timesteps      | 7440064   |
+| train/                  |           |
+|    approx_kl            | 1.3421149 |
+|    clip_fraction        | 0.865     |
+|    clip_range           | 0.2       |
+|    entropy_loss         | -24.5     |
+|    explained_variance   | 0.945     |
+|    learning_rate        | 0.00015   |
+|    loss                 | -0.102    |
+|    n_updates            | 4530      |
+|    policy_gradient_loss | -0.0325   |
+|    std                  | 0.567     |
+|    value_loss           | 0.0424    |
+---------------------------------------
+---------------------------------------
+| rollout/                |           |
+|    ep_len_mean          | 102       |
+|    ep_rew_mean          | 144       |
+|    success_rate         | 0         |
+| time/                   |           |
+|    fps                  | 526       |
+|    iterations           | 56        |
+|    time_elapsed         | 1743      |
+|    total_timesteps      | 7456448   |
+| train/                  |           |
+|    approx_kl            | 1.4196932 |
+|    clip_fraction        | 0.866     |
+|    clip_range           | 0.2       |
+|    entropy_loss         | -24.5     |
+|    explained_variance   | 0.945     |
+|    learning_rate        | 0.00015   |
+|    loss                 | -0.0638   |
+|    n_updates            | 4540      |
+|    policy_gradient_loss | -0.0304   |
+|    std                  | 0.566     |
+|    value_loss           | 0.0413    |
+---------------------------------------
+---------------------------------------
+| rollout/                |           |
+|    ep_len_mean          | 98.5      |
+|    ep_rew_mean          | 133       |
+|    success_rate         | 0         |
+| time/                   |           |
+|    fps                  | 525       |
+|    iterations           | 57        |
+|    time_elapsed         | 1776      |
+|    total_timesteps      | 7472832   |
+| train/                  |           |
+|    approx_kl            | 1.4786651 |
+|    clip_fraction        | 0.869     |
+|    clip_range           | 0.2       |
+|    entropy_loss         | -24.4     |
+|    explained_variance   | 0.946     |
+|    learning_rate        | 0.00015   |
+|    loss                 | -0.0192   |
+|    n_updates            | 4550      |
+|    policy_gradient_loss | -0.0281   |
+|    std                  | 0.566     |
+|    value_loss           | 0.0417    |
+---------------------------------------
+---------------------------------------
+| rollout/                |           |
+|    ep_len_mean          | 99.7      |
+|    ep_rew_mean          | 135       |
+|    success_rate         | 0         |
+| time/                   |           |
+|    fps                  | 525       |
+|    iterations           | 58        |
+|    time_elapsed         | 1807      |
+|    total_timesteps      | 7489216   |
+| train/                  |           |
+|    approx_kl            | 1.4098853 |
+|    clip_fraction        | 0.865     |
+|    clip_range           | 0.2       |
+|    entropy_loss         | -24.5     |
+|    explained_variance   | 0.943     |
+|    learning_rate        | 0.00015   |
+|    loss                 | -0.0674   |
+|    n_updates            | 4560      |
+|    policy_gradient_loss | -0.025    |
+|    std                  | 0.567     |
+|    value_loss           | 0.0437    |
+---------------------------------------
+---------------------------------------
+| rollout/                |           |
+|    ep_len_mean          | 99.8      |
+|    ep_rew_mean          | 129       |
+|    success_rate         | 0         |
+| time/                   |           |
+|    fps                  | 525       |
+|    iterations           | 59        |
+|    time_elapsed         | 1837      |
+|    total_timesteps      | 7505600   |
+| train/                  |           |
+|    approx_kl            | 1.4406159 |
+|    clip_fraction        | 0.869     |
+|    clip_range           | 0.2       |
+|    entropy_loss         | -24.4     |
+|    explained_variance   | 0.944     |
+|    learning_rate        | 0.00015   |
+|    loss                 | -0.0414   |
+|    n_updates            | 4570      |
+|    policy_gradient_loss | -0.0261   |
+|    std                  | 0.566     |
+|    value_loss           | 0.0441    |
+---------------------------------------
+--------------------------------------
+| rollout/                |          |
+|    ep_len_mean          | 101      |
+|    ep_rew_mean          | 136      |
+|    success_rate         | 0        |
+| time/                   |          |
+|    fps                  | 525      |
+|    iterations           | 60       |
+|    time_elapsed         | 1869     |
+|    total_timesteps      | 7521984  |
+| train/                  |          |
+|    approx_kl            | 1.53094  |
+|    clip_fraction        | 0.867    |
+|    clip_range           | 0.2      |
+|    entropy_loss         | -24.4    |
+|    explained_variance   | 0.94     |
+|    learning_rate        | 0.00015  |
+|    loss                 | -0.0792  |
+|    n_updates            | 4580     |
+|    policy_gradient_loss | -0.0296  |
+|    std                  | 0.566    |
+|    value_loss           | 0.0444   |
+--------------------------------------
+---------------------------------------
+| rollout/                |           |
+|    ep_len_mean          | 103       |
+|    ep_rew_mean          | 142       |
+|    success_rate         | 0         |
+| time/                   |           |
+|    fps                  | 525       |
+|    iterations           | 61        |
+|    time_elapsed         | 1901      |
+|    total_timesteps      | 7538368   |
+| train/                  |           |
+|    approx_kl            | 1.5202663 |
+|    clip_fraction        | 0.869     |
+|    clip_range           | 0.2       |
+|    entropy_loss         | -24.4     |
+|    explained_variance   | 0.945     |
+|    learning_rate        | 0.00015   |
+|    loss                 | -0.0734   |
+|    n_updates            | 4590      |
+|    policy_gradient_loss | -0.0278   |
+|    std                  | 0.565     |
+|    value_loss           | 0.0434    |
+---------------------------------------
+---------------------------------------
+| rollout/                |           |
+|    ep_len_mean          | 99.4      |
+|    ep_rew_mean          | 130       |
+|    success_rate         | 0         |
+| time/                   |           |
+|    fps                  | 525       |
+|    iterations           | 62        |
+|    time_elapsed         | 1931      |
+|    total_timesteps      | 7554752   |
+| train/                  |           |
+|    approx_kl            | 1.5272119 |
+|    clip_fraction        | 0.868     |
+|    clip_range           | 0.2       |
+|    entropy_loss         | -24.4     |
+|    explained_variance   | 0.945     |
+|    learning_rate        | 0.00015   |
+|    loss                 | -0.0698   |
+|    n_updates            | 4600      |
+|    policy_gradient_loss | -0.029    |
+|    std                  | 0.565     |
+|    value_loss           | 0.0427    |
+---------------------------------------
+[render] renderer OK (MUJOCO_GL=default)
+[render] pelvis-tracking camera on (body 1); use --static-camera for fixed view
+[render] episode 0: reward=96.5 success=False frames=90
+[render] episode 1: reward=122.7 success=False frames=178
+[render] episode 2: reward=166.0 success=False frames=293
+[render] wrote /home/hatch/workspace/hackathon/runs/stairs_curriculum/eval_stage5_h0.12.mp4 (98 frames)
+[curriculum] stage 5 done: /home/hatch/workspace/hackathon/runs/stairs_curriculum/checkpoints/curriculum_stage5_h0.12.zip + eval_stage5_h0.12.mp4
+[curriculum] ALL STAGES DONE
