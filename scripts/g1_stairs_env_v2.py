@@ -279,6 +279,8 @@ class G1StairsEnvV1(G1StairsEnv):
         torques = d.qfrc_actuator[self._dof_adr]
         lfoot_z = float(d.xpos[self._lfoot][2])
         rfoot_z = float(d.xpos[self._rfoot][2])
+        lfoot_x = float(d.xpos[self._lfoot][0])
+        rfoot_x = float(d.xpos[self._rfoot][0])
         min_foot_z = min(lfoot_z, rfoot_z)
         min_knee_z = float(min(d.xpos[self._lknee][2], d.xpos[self._rknee][2]))
 
@@ -304,14 +306,19 @@ class G1StairsEnvV1(G1StairsEnv):
             r_clear = W_CLEAR * float(np.clip((min_foot_z - 0.02) / 0.12, 0.0, 1.0))
             r_knee = W_KNEE * float(np.clip((min_knee_z - 0.45) / 0.20, 0.0, 1.0))
 
-        # Discrete level bonus: pelvis rises a half step over each step.
+        # Discrete level bonus: a FOOT crosses stair-top k*step_h while over/at stair k.
+        # (Fixed: was pelvis-height based, which required lifting the whole body.)
         r_level = 0.0
         for k in range(1, self.n_stairs + 1):
-            if k not in self._levels and pelvis_pos[2] > self._base_pelvis_z + (
-                k - 0.5
-            ) * self.step_h and pelvis_pos[0] > X0 + (k - 1) * STEP_D - 0.05:
-                self._levels.add(k)
-                r_level += R_LEVEL
+            if k not in self._levels:
+                stair_x0 = X0 + (k - 1) * STEP_D
+                stair_x1 = X0 + k * STEP_D
+                foot_high = (lfoot_z > k * self.step_h or rfoot_z > k * self.step_h)
+                foot_over = (stair_x0 - 0.05 <= lfoot_x <= stair_x1 + 0.05 or
+                             stair_x0 - 0.05 <= rfoot_x <= stair_x1 + 0.05)
+                if foot_high and foot_over:
+                    self._levels.add(k)
+                    r_level += R_LEVEL
 
         # Foot-strike cadence: foot was up, now it lands.
         r_strike = 0.0
