@@ -144,7 +144,7 @@ class G1StairsEnvV1(G1StairsEnv):
     """
 
     def __init__(self, g1_xml=None, n_stairs=6, step_h=0.12, render_mode=None,
-                 track_w=0.0, anti_stand=False, harness=0.0):
+                 track_w=0.0, anti_stand=False, harness=0.0, r_level=2.0):
         # Bypass G1StairsEnv.__init__ (it hardcodes v0 geometry) and repeat
         # the setup with our builder. Observation/action spaces identical.
         import gymnasium as gym
@@ -159,6 +159,7 @@ class G1StairsEnvV1(G1StairsEnv):
         self.track_w = float(track_w)
         self.anti_stand = bool(anti_stand)
         self.harness = float(harness)
+        self.r_level = float(r_level)  # per new stair level reached (R_LEVEL default)
         self.model = _build_model_v1(Path(g1_xml), self.n_stairs, self.step_h)
         self.data = mujoco.MjData(self.model)
 
@@ -318,7 +319,7 @@ class G1StairsEnvV1(G1StairsEnv):
                              stair_x0 - 0.05 <= rfoot_x <= stair_x1 + 0.05)
                 if foot_high and foot_over:
                     self._levels.add(k)
-                    r_level += R_LEVEL
+                    r_level += self.r_level
 
         # Foot-strike cadence: foot was up, now it lands.
         r_strike = 0.0

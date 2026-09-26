@@ -18,7 +18,8 @@ from stable_baselines3.common.vec_env import VecNormalize, DummyVecEnv
 def make_env(args):
     from g1_stairs_env_v2 import G1StairsEnvV1
     return G1StairsEnvV1(n_stairs=args.n_stairs, step_h=args.step_h,
-                        anti_stand=args.anti_stand, harness=args.harness)
+                        anti_stand=args.anti_stand, harness=args.harness,
+                        r_level=args.r_level)
 
 
 def main():
@@ -29,6 +30,7 @@ def main():
     p.add_argument("--step-h", type=float, default=0.06)
     p.add_argument("--anti-stand", action="store_true")
     p.add_argument("--harness", type=float, default=0.0)
+    p.add_argument("--r-level", type=float, default=2.0)
     p.add_argument("--episodes", type=int, default=10)
     p.add_argument("--seed", type=int, default=1234)
     p.add_argument("--out", default=None)
