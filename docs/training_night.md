@@ -3,11 +3,11 @@
 <!-- LIVE-STATUS-START -->
 ## Live status (auto-updated)
 
-- **Updated:** — (supervisor starting)
-- **Run:** `night_baseline`
-- **State:** TRAINING
-- **Timesteps:** —
-- **ep_rew_mean:** — | **ep_len_mean:** — | **success_rate:** — | **approx_kl:** —
+- **Updated:** 01:52 UTC
+- **Run:** `night_h6_stairs`
+- **State:** COMPLETED
+- **Timesteps:** 1561568
+- **ep_rew_mean:** 219 | **ep_len_mean:** 350 | **success_rate:** 0 | **approx_kl:** 1.5112636
 - **Restarts this run:** 0
 <!-- LIVE-STATUS-END -->
 
@@ -51,3 +51,5 @@ from `scripts/train_stairs.py` unless noted. All runs headless.
 
 ## Checkpoints
 - Best final checkpoint + vecnormalize pkl will be force-added here at the end.
+
+**01:52 UTC — `night_h6_stairs` COMPLETED** at 1561568 steps.
